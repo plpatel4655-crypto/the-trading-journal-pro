@@ -9,8 +9,10 @@
             --bg-color: #0f172a;
             --card-bg: #1e293b;
             --accent-cyan: #06b6d4;
+            --accent-green: #10b981;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
+            --border-color: rgba(255, 255, 255, 0.08);
         }
         body {
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -26,32 +28,90 @@
             padding: 40px 20px;
         }
         .header-card {
-            background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(15, 23, 42, 0.8));
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(15, 23, 42, 0.9));
             border: 1px solid var(--accent-cyan);
             border-radius: 16px;
             padding: 30px;
             margin-bottom: 25px;
+            box-shadow: 0 10px 25px -5px rgba(6, 182, 212, 0.15);
         }
         h1 {
             color: var(--accent-cyan);
             margin: 0 0 10px 0;
             font-size: 28px;
+            letter-spacing: -0.5px;
+        }
+        .header-card p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 14px;
         }
         .card {
             background-color: var(--card-bg);
             border-radius: 14px;
-            padding: 22px;
+            padding: 24px;
             margin-bottom: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.07);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
         h2 {
             color: var(--accent-cyan);
-            font-size: 18px;
+            font-size: 19px;
             margin-top: 0;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        ul { padding-left: 20px; color: var(--text-muted); }
-        li { margin-bottom: 8px; }
-        a { color: var(--accent-cyan); text-decoration: none; }
+        p {
+            margin-top: 0;
+            margin-bottom: 12px;
+            color: var(--text-main);
+        }
+        ul {
+            padding-left: 20px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        strong {
+            color: var(--text-main);
+        }
+        a {
+            color: var(--accent-cyan);
+            text-decoration: none;
+            word-break: break-all;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .highlight-box {
+            background: rgba(16, 185, 129, 0.1);
+            border-left: 4px solid var(--accent-green);
+            padding: 14px 18px;
+            border-radius: 6px;
+            margin: 14px 0;
+            font-size: 14px;
+        }
+        .badge {
+            display: inline-block;
+            background: rgba(6, 182, 212, 0.15);
+            color: var(--accent-cyan);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            color: var(--text-muted);
+            font-size: 13px;
+            border-top: 1px solid var(--border-color);
+            margin-top: 40px;
+        }
     </style>
 </head>
 <body>
@@ -59,48 +119,109 @@
 <div class="container">
     <div class="header-card">
         <h1>Privacy Policy</h1>
-        <p><strong>App Name:</strong> THE TRADING JOURNAL PRO | <strong>Effective Date:</strong> August 2026</p>
+        <p><strong>App Name:</strong> THE TRADING JOURNAL PRO &nbsp;|&nbsp; <strong>Package:</strong> com.thetradingjournalpro &nbsp;|&nbsp; <strong>Effective Date:</strong> August 2026</p>
     </div>
 
     <div class="card">
-        <h2>1. Information We Collect</h2>
-        <p>THE TRADING JOURNAL PRO collects only essential data required to deliver performance tracking services:</p>
+        <h2>1. Overview & Commitment</h2>
+        <p>Welcome to <strong>THE TRADING JOURNAL PRO</strong>. We respect your privacy and are committed to protecting your personal information. This Privacy Policy explains how our application collects, uses, secures, and handles your data when you use our mobile application and related cloud services.</p>
+        <div class="highlight-box">
+            🛡️ <strong>Core Principle:</strong> Your trading data belongs solely to you. We <strong>NEVER</strong> sell, rent, trade, or share your personal trading records or broker statements with third-party data brokers, marketers, or advisory firms.
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>2. Information We Collect</h2>
+        <p>To provide personal trade journaling, analytics, and cloud synchronization, we collect the following categories of information:</p>
         <ul>
-            <li><strong>User Profile:</strong> Email address, display name, and avatar fetched via Google OAuth or Email Sign-in.</li>
-            <li><strong>Trading Journal Data:</strong> Trade entries, buy/sell prices, notes, strategies, and uploaded broker CSV files.</li>
-            <li><strong>Device Security Identifiers:</strong> A randomly generated App Instance UUID used strictly to enforce single active session security.</li>
+            <li><strong>User Profile Data:</strong> Email address, username, profile display picture/avatar, address, and mobile number collected during Google OAuth or Email Sign-in.</li>
+            <li><strong>Trading & Financial Records:</strong> Stock, Option, and Futures trade entries, buy/sell prices, trade quantities, P&L metrics, custom strategies, trading playbook notes, and uploaded broker CSV files.</li>
+            <li><strong>Payment & Subscription Records:</strong> Subscription plan type (Monthly, Quarterly, Yearly, Lifetime), purchase timestamps, order IDs, and payment status. <em>(Note: Sensitive card details or UPI PINs are processed directly by Google Play / Razorpay and are never stored on our servers).</em></li>
+            <li><strong>Device & Security Identifiers:</strong> Unique Device Hardware ID (Android ID) used strictly to enforce single-device session security and authorized admin verification.</li>
+            <li><strong>AdMob Advertising ID:</strong> Google Advertising ID (AAID) used by Google AdMob to deliver relevant non-intrusive advertisements and prevent ad fraud for free-tier users.</li>
         </ul>
     </div>
 
     <div class="card">
-        <h2>2. Data Protection & AES-256 Encryption</h2>
+        <h2>3. How We Use Your Information</h2>
+        <p>We use the collected information for the following specific purposes:</p>
         <ul>
-            <li><strong>Encryption:</strong> Database backups are protected using AES-256-GCM encryption.</li>
-            <li><strong>Transport Security:</strong> Network traffic uses secure HTTPS with TLS.</li>
-            <li><strong>Row Level Security (RLS):** Database policies ensure that user data can only be accessed by the authenticated owner.</li>
+            <li>To compute trade analytics, win rates, risk-reward metrics, and trading performance charts.</li>
+            <li>To synchronize your journal entries securely across your devices via Supabase Cloud.</li>
+            <li>To manage your Pro subscription status and grant feature access.</li>
+            <li>To prevent unauthorized multi-device account sharing via single-session enforcement.</li>
+            <li>To respond to user support inquiries and provide technical assistance.</li>
         </ul>
     </div>
 
     <div class="card">
-        <h2>3. Third-Party Service Integrations</h2>
-        <p>We work with trusted services for authentication, storage, and billing:</p>
+        <h2>4. Data Security & AES-256 Encryption</h2>
+        <p>We implement industry-standard security measures to safeguard your sensitive trade data:</p>
         <ul>
-            <li><strong>Google AdMob & Play Services:</strong> Ad serving and Play Store purchase verification.</li>
-            <li><strong>Razorpay & Google Play Billing:</strong> Secure payment processing.</li>
-            <li><strong>Supabase Cloud:</strong> Encrypted cloud database sync.</li>
+            <li><strong>AES-256-GCM Encryption:</strong> Database backups and sensitive cached settings are encrypted using AES-256-GCM encryption.</li>
+            <li><strong>Transport Layer Security (TLS/HTTPS):</strong> All network communications between the mobile app and cloud servers use encrypted HTTPS/TLS protocols.</li>
+            <li><strong>Row Level Security (RLS):</strong> Database policies restrict database access so that trade records can only be read or written by the authenticated account owner.</li>
         </ul>
-        <p><em>We NEVER sell, lease, or trade your personal trading data to third-party data brokers.</em></p>
     </div>
 
     <div class="card">
-        <h2>4. Data Ownership & Account Deletion Policy</h2>
-        <p>You retain 100% ownership of your trading records. You can request complete deletion of your account and cloud profile anytime within App Profile Settings or by emailing <a href="mailto:contact.thetradingjournalpro@gmail.com">contact.thetradingjournalpro@gmail.com</a>.</p>
+        <h2>5. Third-Party Service Integrations</h2>
+        <p>Our app integrates with trusted third-party SDKs to provide authentication, database, payment, and ad services:</p>
+        <ul>
+            <li><strong>Google Play Services & Google OAuth:</strong> For secure account authentication and Google Sign-in. <a href="https://policies.google.com/privacy" target="_blank">Google Privacy Policy</a></li>
+            <li><strong>Google AdMob:</strong> For serving banner, interstitial, native, and rewarded ads to free users. <a href="https://support.google.com/admob/answer/6128543" target="_blank">AdMob Privacy Information</a></li>
+            <li><strong>Google Play Billing & Razorpay:</strong> For processing in-app purchases and Pro subscriptions securely. <a href="https://razorpay.com/privacy/" target="_blank">Razorpay Privacy Policy</a></li>
+            <li><strong>Supabase Cloud Services:</strong> For encrypted cloud database storage, authentication, and realtime sync. <a href="https://supabase.com/privacy" target="_blank">Supabase Privacy Policy</a></li>
+        </ul>
     </div>
 
     <div class="card">
-        <h2>5. Contact Us</h2>
-        <p>Email Support: <a href="mailto:contact.thetradingjournalpro@gmail.com">contact.thetradingjournalpro@gmail.com</a> (Response SLA: 24 Business Hours)</p>
+        <h2>6. App Permissions & Package Visibility Disclosure</h2>
+        <p>Our application requests specific system permissions to function properly:</p>
+        <ul>
+            <li><strong>Internet & Network State:</strong> Required for Supabase cloud sync, user authentication, and subscription validation.</li>
+            <li><strong>Storage Access (READ/WRITE_EXTERNAL_STORAGE):</strong> Required to import broker CSV files and save local encrypted database backups.</li>
+            <li><strong>Package Visibility Query (<code>QUERY_ALL_PACKAGES</code>):</strong> Used strictly to discover installed UPI Payment apps (Google Pay, PhonePe, Paytm, BHIM, CRED) on Indian Android devices to provide a seamless Razorpay UPI checkout flow. We do not inspect or collect data regarding other installed applications.</li>
+        </ul>
     </div>
+
+    <div class="card">
+        <h2>7. Financial Advisory Disclaimer</h2>
+        <p><strong>THE TRADING JOURNAL PRO</strong> is a personal trade logging and quantitative performance analytics tool. We are <strong>NOT</strong> a stockbroker, financial advisor, or SEBI-registered advisory entity. Our application does not execute trades directly on stock exchanges or provide buy/sell stock tips.</p>
+    </div>
+
+    <div class="card">
+        <h2>8. Data Ownership & Account Deletion Policy</h2>
+        <p>You retain 100% ownership of your trading data at all times. In compliance with Google Play Developer Policies, you have the right to request complete deletion of your account and associated data:</p>
+        <p><strong>How to Delete Your Account & Data:</strong></p>
+        <ul>
+            <li><strong>In-App Deletion:</strong> Open the App ➔ Navigate to <em>Profile Settings</em> ➔ Tap <em>"Delete Account & Wipe Cloud Data"</em>. This will immediately erase your profile, trade entries, notes, and cloud database records.</li>
+            <li><strong>Web / Email Deletion Request:</strong> If you cannot access the app, email your deletion request to <a href="mailto:contact.thetradingjournalpro@gmail.com">contact.thetradingjournalpro@gmail.com</a> from your registered email address with the subject <code>ACCOUNT DELETION REQUEST</code>. Your account and cloud data will be permanently wiped within 48 hours.</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h2>9. Children's Privacy</h2>
+        <p>Our application is intended for adult stock market traders aged 18 and older. We do not knowingly collect or solicit personal information from children under the age of 18 (or under 13). If we discover that a child has provided us with personal data, we will immediately delete it from our servers.</p>
+    </div>
+
+    <div class="card">
+        <h2>10. Changes to This Privacy Policy</h2>
+        <p>We may update our Privacy Policy periodically to reflect app updates or regulatory changes. Any modifications will be posted on this page with an updated "Effective Date". We encourage you to review this policy periodically.</p>
+    </div>
+
+    <div class="card">
+        <h2>11. Contact Us & Support SLA</h2>
+        <p>If you have any questions, concerns, or data deletion requests regarding this Privacy Policy, please contact us:</p>
+        <ul>
+            <li><strong>Email Support:</strong> <a href="mailto:contact.thetradingjournalpro@gmail.com">contact.thetradingjournalpro@gmail.com</a></li>
+            <li><strong>Support SLA:</strong> We respond to all technical and privacy inquiries within 24–48 Business Hours.</li>
+        </ul>
+    </div>
+
+    <footer>
+        &copy; 2026 THE TRADING JOURNAL PRO. All Rights Reserved.
+    </footer>
 </div>
 
 </body>
