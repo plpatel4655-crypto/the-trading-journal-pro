@@ -95,15 +95,6 @@
             margin: 14px 0;
             font-size: 14px;
         }
-        .badge {
-            display: inline-block;
-            background: rgba(6, 182, 212, 0.15);
-            color: var(--accent-cyan);
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
-        }
         footer {
             text-align: center;
             padding: 20px 0;
@@ -136,7 +127,7 @@
         <ul>
             <li><strong>User Profile Data:</strong> Email address, username, profile display picture/avatar, address, and mobile number collected during Google OAuth or Email Sign-in.</li>
             <li><strong>Trading & Financial Records:</strong> Stock, Option, and Futures trade entries, buy/sell prices, trade quantities, P&L metrics, custom strategies, trading playbook notes, and uploaded broker CSV files.</li>
-            <li><strong>Payment & Subscription Records:</strong> Subscription plan type (Monthly, Quarterly, Yearly, Lifetime), purchase timestamps, order IDs, and payment status. <em>(Note: Sensitive card details or UPI PINs are processed directly by Google Play / Razorpay and are never stored on our servers).</em></li>
+            <li><strong>Payment & Subscription Records:</strong> Subscription plan type (Monthly, Quarterly, Yearly, Lifetime), purchase timestamps, order IDs, and payment status. <em>(Note: Sensitive payment card details or UPI PINs are handled directly via Google Play Billing & Payments and are never stored on our servers).</em></li>
             <li><strong>Device & Security Identifiers:</strong> Unique Device Hardware ID (Android ID) used strictly to enforce single-device session security and authorized admin verification.</li>
             <li><strong>AdMob Advertising ID:</strong> Google Advertising ID (AAID) used by Google AdMob to deliver relevant non-intrusive advertisements and prevent ad fraud for free-tier users.</li>
         </ul>
@@ -168,9 +159,10 @@
         <h2>5. Third-Party Service Integrations</h2>
         <p>Our app integrates with trusted third-party SDKs to provide authentication, database, payment, and ad services:</p>
         <ul>
+            <li><strong>Google Play Billing & Payments:</strong> For processing in-app purchases and Pro subscriptions securely through Google Play Store. <a href="https://policies.google.com/privacy" target="_blank">Google Play Billing & Payments Privacy Policy</a></li>
             <li><strong>Google Play Services & Google OAuth:</strong> For secure account authentication and Google Sign-in. <a href="https://policies.google.com/privacy" target="_blank">Google Privacy Policy</a></li>
             <li><strong>Google AdMob:</strong> For serving banner, interstitial, native, and rewarded ads to free users. <a href="https://support.google.com/admob/answer/6128543" target="_blank">AdMob Privacy Information</a></li>
-            <li><strong>Google Play Billing & Razorpay:</strong> For processing in-app purchases and Pro subscriptions securely. <a href="https://razorpay.com/privacy/" target="_blank">Razorpay Privacy Policy</a></li>
+            <li><strong>Razorpay Payments:</strong> For alternative secure UPI payment processing. <a href="https://razorpay.com/privacy/" target="_blank">Razorpay Privacy Policy</a></li>
             <li><strong>Supabase Cloud Services:</strong> For encrypted cloud database storage, authentication, and realtime sync. <a href="https://supabase.com/privacy" target="_blank">Supabase Privacy Policy</a></li>
         </ul>
     </div>
@@ -181,7 +173,7 @@
         <ul>
             <li><strong>Internet & Network State:</strong> Required for Supabase cloud sync, user authentication, and subscription validation.</li>
             <li><strong>Storage Access (READ/WRITE_EXTERNAL_STORAGE):</strong> Required to import broker CSV files and save local encrypted database backups.</li>
-            <li><strong>Package Visibility Query (<code>QUERY_ALL_PACKAGES</code>):</strong> Used strictly to discover installed UPI Payment apps (Google Pay, PhonePe, Paytm, BHIM, CRED) on Indian Android devices to provide a seamless Razorpay UPI checkout flow. We do not inspect or collect data regarding other installed applications.</li>
+            <li><strong>Package Visibility Query (<code>QUERY_ALL_PACKAGES</code>):</strong> Used strictly to discover installed UPI Payment apps (Google Pay, PhonePe, Paytm, BHIM, CRED) on Indian Android devices to provide a seamless UPI checkout flow. We do not inspect or collect data regarding other installed applications.</li>
         </ul>
     </div>
 
