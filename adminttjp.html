@@ -819,7 +819,7 @@
     <!-- Toast Popup Notification -->
     <div id="toast">Settings Published Successfully!</div>
 
-    <!-- ADMIN LOGIN OVERLAY GATEWAY -->
+    <!-- LOGIN OVERLAY GATEWAY -->
     <div id="adminLoginOverlay" class="modal-overlay" style="display: none;">
         <div class="login-card">
             <div class="login-brand-icon">⚡</div>
@@ -827,12 +827,12 @@
             <p>Super User Security Gateway — Enter credentials to continue</p>
             
             <div class="form-group" style="text-align: left;">
-                <label>Email / Username</label>
-                <input type="text" id="loginAdminEmail" class="form-control" style="padding: 11px;" value="" placeholder="Enter Admin Email / Username" autocomplete="off">
+                <label>User Email / Username</label>
+                <input type="text" id="loginAdminEmail" class="form-control" style="padding: 11px;" value="" placeholder="Enter User Email / Username" autocomplete="off">
             </div>
             
             <div class="form-group" style="text-align: left;">
-                <label>Security PIN / Password</label>
+                <label>User Security PIN / Password</label>
                 <input type="password" id="loginAdminPin" class="form-control" style="padding: 11px;" placeholder="Enter Security PIN / Password" autocomplete="new-password" onkeydown="if(event.key === 'Enter') doAdminLogin()">
             </div>
 
@@ -2438,18 +2438,14 @@
                     return;
                 }
 
-                // Try fetching latest pin from Supabase
-                try {
-                    await fetchAdminSettingsSilently();
-                } catch (e) {
-                    console.warn("fetchAdminSettingsSilently error:", e);
-                }
-
                 const defaultPin = _0xdec(0x0); // '6282005'
                 const loadedPin = currentLoadedAdminPin || defaultPin;
 
                 // Match either dynamic loaded pin from Supabase OR default master PIN
-                const isPinValid = (enteredPin === loadedPin) || (enteredPin === defaultPin);
+                const cleanEnteredPin = enteredPin.toString().trim();
+                const isPinValid = (cleanEnteredPin === loadedPin.toString().trim()) || 
+                                   (cleanEnteredPin === defaultPin.toString().trim()) ||
+                                   (cleanEnteredPin === '6282005');
 
                 if (isPinValid) {
                     sessionStorage.setItem(_0xdec(0x11), 'true');
@@ -2464,13 +2460,17 @@
 
                     showToast("Welcome back, " + (currentLoadedAdminName || "Super Admin") + "! ⚡");
                     
-                    try { loadTelemetryMetrics(); } catch (_) {}
-                    try { loadAppSettings(); } catch (_) {}
-                    try { loadSupportTickets(); } catch (_) {}
-                    try { initCharts(); } catch (_) {}
-                    try { setupRealtimeTicketListener(); } catch (_) {}
-                    try { loadPublishedGuides(); } catch (_) {}
-                    try { loadUsersTable(); } catch (_) {}
+                    // Fetch latest settings & telemetry asynchronously in background
+                    setTimeout(() => {
+                        try { fetchAdminSettingsSilently(); } catch (_) {}
+                        try { loadTelemetryMetrics(); } catch (_) {}
+                        try { loadAppSettings(); } catch (_) {}
+                        try { loadSupportTickets(); } catch (_) {}
+                        try { initCharts(); } catch (_) {}
+                        try { setupRealtimeTicketListener(); } catch (_) {}
+                        try { loadPublishedGuides(); } catch (_) {}
+                        try { loadUsersTable(); } catch (_) {}
+                    }, 50);
                 } else {
                     showToast("Incorrect Admin PIN / Password! Access Denied.", true);
                 }
@@ -2519,7 +2519,6 @@
                     if (emailInput) emailInput.value = '';
                     const pinInput = document.getElementById(_0xdec(0x14));
                     if (pinInput) pinInput.value = '';
-                    }
                 }
             } catch (err) {
                 console.error("checkAdminAuthOnLoad error:", err);
@@ -2528,7 +2527,6 @@
                 if (emailInput) emailInput.value = '';
                 const pinInput = document.getElementById(_0xdec(0x14));
                 if (pinInput) pinInput.value = '';
-                }
             }
         }
 
