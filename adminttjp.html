@@ -828,12 +828,12 @@
             
             <div class="form-group" style="text-align: left;">
                 <label>Email / Username</label>
-                <input type="text" id="loginAdminEmail" class="form-control" style="padding: 11px;" value="" placeholder="Enter Email / Username">
+                <input type="text" id="loginAdminEmail" class="form-control" style="padding: 11px;" value="" placeholder="Enter Admin Email / Username" autocomplete="off">
             </div>
             
             <div class="form-group" style="text-align: left;">
                 <label>Security PIN / Password</label>
-                <input type="password" id="loginAdminPin" class="form-control" style="padding: 11px;" placeholder="Enter Security PIN / Password" onkeydown="if(event.key === 'Enter') doAdminLogin()">
+                <input type="password" id="loginAdminPin" class="form-control" style="padding: 11px;" placeholder="Enter Security PIN / Password" autocomplete="new-password" onkeydown="if(event.key === 'Enter') doAdminLogin()">
             </div>
 
             <button class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 13px; margin-top: 10px;" onclick="doAdminLogin()">🔐 LOGIN TO SUPER ADMIN PANEL</button>
@@ -2516,16 +2516,18 @@
                 } else {
                     hideDashboard();
                     const emailInput = document.getElementById(_0xdec(0x13));
-                    if (emailInput && !emailInput.value) {
-                        emailInput.value = currentLoadedAdminEmail || _0xdec(0x1);
+                    if (emailInput) emailInput.value = '';
+                    const pinInput = document.getElementById(_0xdec(0x14));
+                    if (pinInput) pinInput.value = '';
                     }
                 }
             } catch (err) {
                 console.error("checkAdminAuthOnLoad error:", err);
                 hideDashboard();
                 const emailInput = document.getElementById(_0xdec(0x13));
-                if (emailInput && !emailInput.value) {
-                    emailInput.value = currentLoadedAdminEmail || _0xdec(0x1);
+                if (emailInput) emailInput.value = '';
+                const pinInput = document.getElementById(_0xdec(0x14));
+                if (pinInput) pinInput.value = '';
                 }
             }
         }
