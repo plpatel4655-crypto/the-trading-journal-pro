@@ -2208,15 +2208,31 @@
                     container.innerHTML = '<p style="color:var(--text-muted); font-size:11px;">No educational guides published yet.</p>';
                     return;
                 }
-                container.innerHTML = guides.map(g => `
+                container.innerHTML = guides.map(g => {
+                    let dStr = '';
+                    if (g.created_at) {
+                        try {
+                            const d = new Date(g.created_at);
+                            if (!isNaN(d.getTime())) {
+                                const dd = String(d.getDate()).padStart(2, '0');
+                                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                                const yyyy = d.getFullYear();
+                                dStr = `${dd}-${mm}-${yyyy}`;
+                            } else {
+                                dStr = (g.created_at || '').substring(0, 10);
+                            }
+                        } catch (_) { dStr = (g.created_at || '').substring(0, 10); }
+                    }
+                    return `
                     <div style="background:var(--surface-bg); border:1px solid var(--border-color); border-radius:8px; padding:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
                         <div>
                             <strong style="font-size:12px; color:var(--text-main);">${g.title}</strong>
-                            <p style="font-size:10px; color:var(--text-muted); margin-top:2px;">Category: ${g.category || 'General'} • Date: ${(g.created_at || '').substring(0,10)}</p>
+                            <p style="font-size:10px; color:var(--text-muted); margin-top:2px;">Category: ${g.category || 'General'} • Date: ${dStr}</p>
                         </div>
                         <button class="btn btn-danger" style="font-size:10px; padding:4px 10px;" onclick="deleteGuideArticle('${g.id}')">🗑️ Delete Guide</button>
                     </div>
-                `).join('');
+                    `;
+                }).join('');
             } catch (e) { container.innerHTML = '<p style="color:var(--text-muted); font-size:11px;">Unable to load guides: ' + (e.message || e) + '</p>'; }
         }
 
@@ -2256,8 +2272,13 @@
             const userDismissible = document.getElementById('cfg_quote_user_dismissible').checked ? 'true' : 'false';
             if (!quote) { showToast('Quote text is required!', true); return; }
 
-            const todayStr = new Date().toISOString().substring(0, 10);
-            const nowTs = new Date().getTime().toString();
+            // Standardize to dd-MM-yyyy in device local timezone
+            const now = new Date();
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            const todayStr = `${day}-${month}-${year}`;
+            const nowTs = now.getTime().toString();
 
             try {
                 await supabaseClient.from(_0xdec(0x5)).upsert([
@@ -2271,7 +2292,7 @@
                     { key: 'quote_publish_date', value: todayStr },
                     { key: 'quote_updated_at', value: nowTs }
                 ], { onConflict: 'key' });
-                showToast(`💡 Daily Trading Quote & Tag Published Successfully to App Header!`);
+                showToast(`💡 Daily Trading Quote & Tag Published Successfully (${todayStr})!`);
             } catch (e) { showToast('Quote update: ' + e.message, true); }
         }
 
@@ -2279,12 +2300,15 @@
             if (!supabaseClient) return;
             if (!confirm('Are you sure you want to delete/remove the Daily Trading Quote?')) return;
             try {
+                const nowTs = new Date().getTime().toString();
                 await supabaseClient.from(_0xdec(0x5)).upsert([
                     { key: 'quote_active', value: 'false' },
                     { key: 'daily_quote', value: '' },
                     { key: 'quote_author', value: '' },
                     { key: 'quote_tag', value: '' },
-                    { key: 'quote_image_url', value: '' }
+                    { key: 'quote_image_url', value: '' },
+                    { key: 'quote_publish_date', value: '' },
+                    { key: 'quote_updated_at', value: nowTs }
                 ], { onConflict: 'key' });
                 if (document.getElementById('cfg_quote_active')) document.getElementById('cfg_quote_active').checked = false;
                 if (document.getElementById('cfg_daily_quote')) document.getElementById('cfg_daily_quote').value = '';
