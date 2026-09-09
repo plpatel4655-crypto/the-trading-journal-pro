@@ -518,8 +518,20 @@
                     <div class="form-group"><label>Popup Banner Image URL (Optional)</label><input type="text" id="cfg_popup_image" class="form-control" placeholder="https://example.com/banner.png"></div>
                     
                     <div style="display: flex; gap: 10px; margin-top: 12px;">
-                        <button class="btn btn-primary" style="flex: 2; padding: 10px;" onclick="saveSystemConfig()">📢 PUBLISH POPUP ANNOUNCEMENT</button>
+                        <button class="btn btn-primary" style="flex: 2; padding: 10px;" onclick="publishPopupAnnouncement()">📢 PUBLISH POPUP ANNOUNCEMENT</button>
                         <button class="btn btn-danger" style="flex: 1; padding: 10px;" onclick="deletePopupAnnouncement()">🗑️ DELETE POPUP</button>
+                    </div>
+
+                    <div style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 16px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <h4 style="font-size: 13px; color: var(--primary); font-weight: 800; display: flex; align-items: center; gap: 6px;">
+                                📋 PUBLISHED POPUP ANNOUNCEMENTS LIST
+                            </h4>
+                            <button class="btn btn-secondary" style="font-size: 10.5px; padding: 4px 10px;" onclick="loadPublishedPopups()">🔄 Refresh List</button>
+                        </div>
+                        <div id="publishedPopupsContainer">
+                            <p style="color: var(--text-muted); font-size: 11px;">Loading announcements...</p>
+                        </div>
                     </div>
                 </div>
 
@@ -809,7 +821,29 @@
                         <div class="form-group"><label>Yearly Plan Price (₹)</label><input type="text" id="cfg_yearly_price" class="form-control" value="3999"></div>
                         <div class="form-group"><label>Lifetime Price (₹)</label><input type="text" id="cfg_lifetime_price" class="form-control" value="7999"></div>
                     </div>
-                    <button class="btn btn-primary" style="width: 100%; padding: 12px; margin-top: 10px;" onclick="saveMonetizationConfig()">💾 SAVE MONETIZATION CONFIG TO SUPABASE</button>
+                </div>
+
+                <div class="panel-card">
+                    <h3>💳 PAYMENT GATEWAY DISPLAY CONTROL</h3>
+                    <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">Control which payment options users see on the Paywall Screen & Locked Feature Guards</p>
+                    <div class="form-group">
+                        <label>Active Payment Gateways Shown to Users</label>
+                        <select id="cfg_gateway_mode" class="form-control" style="font-weight: 600; font-size: 12.5px;">
+                            <option value="BOTH">🌐 Show Both (Google Play + Razorpay)</option>
+                            <option value="GOOGLE_PLAY">🟢 Google Play Billing Only</option>
+                            <option value="RAZORPAY">🔵 Razorpay Gateway Only</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="panel-card">
+                    <h3>📊 FREE USER MAX TRADES LIMIT CONTROL</h3>
+                    <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">Set maximum number of trades free non-Pro users can add / import into the app.</p>
+                    <div class="form-group">
+                        <label>Free User Max Trades Limit (Default: 100)</label>
+                        <input type="number" id="cfg_free_user_trade_limit" class="form-control" placeholder="e.g. 50, 100, 200, 500" value="100" min="1">
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%; padding: 12px; margin-top: 14px;" onclick="saveMonetizationConfig()">💾 SAVE MONETIZATION CONFIG TO SUPABASE</button>
                 </div>
             </div>
 
@@ -1087,6 +1121,7 @@
             if (tabName === 'analytics') updateChartsData();
             if (tabName === 'payments') loadPaymentLogs();
             if (tabName === _0xdec(0xf)) loadPublishedGuides();
+            if (tabName === 'settings') { loadAppSettings(); try { loadPublishedPopups(); } catch (_) {} }
         }
 
         function toggleAudioAlerts() {
@@ -1249,6 +1284,8 @@
                         if (monObj.min_version_code && document.getElementById('cfg_min_version')) document.getElementById('cfg_min_version').value = monObj.min_version_code;
                         if (monObj.force_update_enabled !== undefined && document.getElementById('cfg_force_update_enabled')) document.getElementById('cfg_force_update_enabled').checked = !!monObj.force_update_enabled;
                         if (monObj.admin_pin && document.getElementById('cfg_admin_pin')) document.getElementById('cfg_admin_pin').value = monObj.admin_pin;
+                        if (monObj.gateway_mode && document.getElementById('cfg_gateway_mode')) document.getElementById('cfg_gateway_mode').value = monObj.gateway_mode;
+                        if (monObj.free_user_trade_limit !== undefined && document.getElementById('cfg_free_user_trade_limit')) document.getElementById('cfg_free_user_trade_limit').value = monObj.free_user_trade_limit;
                     } catch(e) {}
                 }
 
@@ -1271,6 +1308,8 @@
                 if (map['quarterly_price'] && document.getElementById('cfg_quarterly_price')) document.getElementById('cfg_quarterly_price').value = map['quarterly_price'];
                 if (map['yearly_price'] && document.getElementById('cfg_yearly_price')) document.getElementById('cfg_yearly_price').value = map['yearly_price'];
                 if (map['lifetime_price'] && document.getElementById('cfg_lifetime_price')) document.getElementById('cfg_lifetime_price').value = map['lifetime_price'];
+                if (map['gateway_mode'] && document.getElementById('cfg_gateway_mode')) document.getElementById('cfg_gateway_mode').value = map['gateway_mode'];
+                if (map['free_user_trade_limit'] && document.getElementById('cfg_free_user_trade_limit')) document.getElementById('cfg_free_user_trade_limit').value = map['free_user_trade_limit'];
 
                 if (map['is_force_update_enabled'] !== undefined && document.getElementById('cfg_force_update_enabled')) document.getElementById('cfg_force_update_enabled').checked = map['is_force_update_enabled'] === 'true';
                 if (map['system_maintenance_mode'] !== undefined) {
@@ -1310,6 +1349,8 @@
                 if (map['guides_active'] !== undefined && document.getElementById('cfg_guides_active')) {
                     document.getElementById('cfg_guides_active').checked = map['guides_active'] !== 'false';
                 }
+
+                try { loadPublishedPopups(); } catch (_) {}
             } catch (err) {}
         }
 
@@ -1983,6 +2024,9 @@
             const isForceUpdate = document.getElementById('cfg_force_update_enabled') ? document.getElementById('cfg_force_update_enabled').checked : false;
             const pin = document.getElementById('cfg_admin_pin') ? document.getElementById('cfg_admin_pin').value.trim() : '';
 
+            const gatewayMode = document.getElementById('cfg_gateway_mode') ? document.getElementById('cfg_gateway_mode').value : 'BOTH';
+            const freeTradeLimit = document.getElementById('cfg_free_user_trade_limit') ? (parseInt(document.getElementById('cfg_free_user_trade_limit').value) || 100) : 100;
+
             const payload = {
                 global_ads: isGlobalAds,
                 banner_ads: isBannerAds,
@@ -1999,8 +2043,8 @@
                 intro_enabled: true,
                 min_version_code: minVersion,
                 force_update_enabled: isForceUpdate,
-                gateway_mode: "BOTH",
-                free_user_trade_limit: 100,
+                gateway_mode: gatewayMode,
+                free_user_trade_limit: freeTradeLimit,
                 payment_enabled: isPaymentEnabled
             };
             if (pin && pin.length === 7) payload.admin_pin = pin;
@@ -2015,6 +2059,13 @@
             const pinElem = document.getElementById('cfg_admin_pin');
             const pin = pinElem ? pinElem.value.trim() : '';
 
+            const now = new Date();
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            const todayStr = `${day}-${month}-${year}`;
+            const nowTs = now.getTime().toString();
+
             const rows = [
                 { key: _0xdec(0x6), value: JSON.stringify(monConfig) },
                 { key: 'is_force_update_enabled', value: monConfig.force_update_enabled ? 'true' : 'false' },
@@ -2024,12 +2075,16 @@
                 { key: 'popup_title', value: document.getElementById('cfg_popup_title').value.trim() },
                 { key: 'popup_msg', value: document.getElementById('cfg_popup_msg').value.trim() },
                 { key: 'popup_image', value: document.getElementById('cfg_popup_image').value.trim() },
+                { key: 'popup_date', value: todayStr },
+                { key: 'popup_updated_at', value: nowTs },
                 { key: 'parser_zerodha', value: document.getElementById('cfg_parser_zerodha').checked ? 'true' : 'false' },
                 { key: 'parser_groww', value: document.getElementById('cfg_parser_groww').checked ? 'true' : 'false' },
                 { key: 'parser_angelone', value: document.getElementById('cfg_parser_angelone').checked ? 'true' : 'false' },
                 { key: 'parser_dhan', value: document.getElementById('cfg_parser_dhan').checked ? 'true' : 'false' },
                 { key: 'parser_upstox', value: document.getElementById('cfg_parser_upstox').checked ? 'true' : 'false' },
-                { key: 'parser_kotak', value: document.getElementById('cfg_parser_kotak').checked ? 'true' : 'false' }
+                { key: 'parser_kotak', value: document.getElementById('cfg_parser_kotak').checked ? 'true' : 'false' },
+                { key: 'gateway_mode', value: monConfig.gateway_mode },
+                { key: 'free_user_trade_limit', value: monConfig.free_user_trade_limit.toString() }
             ];
 
             if (pin && pin.length === 7) rows.push({ key: _0xdec(0x7), value: pin });
@@ -2042,22 +2097,296 @@
             } catch (err) { showToast('Save Error: ' + err.message, true); }
         }
 
+        async function publishPopupAnnouncement() {
+            if (!supabaseClient) return;
+            const title = document.getElementById('cfg_popup_title') ? document.getElementById('cfg_popup_title').value.trim() : '';
+            const msg = document.getElementById('cfg_popup_msg') ? document.getElementById('cfg_popup_msg').value.trim() : '';
+            const img = document.getElementById('cfg_popup_image') ? document.getElementById('cfg_popup_image').value.trim() : '';
+
+            if (!title && !msg) {
+                showToast('Please enter at least a Title or Message for the popup!', true);
+                return;
+            }
+
+            if (document.getElementById('cfg_popup_active')) {
+                document.getElementById('cfg_popup_active').checked = true;
+            }
+
+            // Standardize to dd-MM-yyyy in local timezone
+            const now = new Date();
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            const todayStr = `${day}-${month}-${year}`;
+            const nowTs = now.getTime().toString();
+
+            try {
+                let popupList = [];
+                const { data } = await supabaseClient.from(_0xdec(0x5)).select('value').eq('key', 'popup_announcements_list').maybeSingle();
+                if (data && data.value) {
+                    try { popupList = JSON.parse(data.value); } catch (_) { popupList = []; }
+                }
+                if (!Array.isArray(popupList)) popupList = [];
+
+                // Mark previous active items as inactive
+                popupList = popupList.map(p => ({ ...p, isActive: false }));
+
+                const newItem = {
+                    id: 'pop_' + nowTs,
+                    title: title,
+                    message: msg,
+                    imageUrl: img,
+                    date: todayStr,
+                    isActive: true,
+                    updatedAt: parseInt(nowTs)
+                };
+
+                popupList.unshift(newItem);
+                popupList = popupList.slice(0, 30);
+
+                const { error } = await supabaseClient.from(_0xdec(0x5)).upsert([
+                    { key: 'popup_active', value: 'true' },
+                    { key: 'popup_title', value: title },
+                    { key: 'popup_msg', value: msg },
+                    { key: 'popup_image', value: img },
+                    { key: 'popup_date', value: todayStr },
+                    { key: 'popup_updated_at', value: nowTs },
+                    { key: 'popup_announcements_list', value: JSON.stringify(popupList) }
+                ], { onConflict: 'key' });
+                if (error) throw error;
+                showToast('📢 Global Announcement Popup Published & Added to List!');
+                loadAppSettings();
+                loadPublishedPopups();
+            } catch (err) {
+                showToast('Popup Publish Error: ' + err.message, true);
+            }
+        }
+
         async function deletePopupAnnouncement() {
             if (!supabaseClient) return;
-            if (!confirm('Are you sure you want to delete/remove the Global Announcement Popup?')) return;
+            if (!confirm('Are you sure you want to disable and remove the active announcement from the app?')) return;
+            const nowTs = Date.now().toString();
             try {
-                await supabaseClient.from(_0xdec(0x5)).upsert([
+                let popupList = [];
+                const { data } = await supabaseClient.from(_0xdec(0x5)).select('value').eq('key', 'popup_announcements_list').maybeSingle();
+                if (data && data.value) {
+                    try { popupList = JSON.parse(data.value); } catch (_) { popupList = []; }
+                }
+                if (Array.isArray(popupList)) {
+                    popupList = popupList.map(p => ({ ...p, isActive: false }));
+                } else {
+                    popupList = [];
+                }
+
+                const { error } = await supabaseClient.from(_0xdec(0x5)).upsert([
                     { key: 'popup_active', value: 'false' },
                     { key: 'popup_title', value: '' },
                     { key: 'popup_msg', value: '' },
-                    { key: 'popup_image', value: '' }
+                    { key: 'popup_image', value: '' },
+                    { key: 'popup_date', value: '' },
+                    { key: 'popup_updated_at', value: nowTs },
+                    { key: 'popup_announcements_list', value: JSON.stringify(popupList) }
                 ], { onConflict: 'key' });
+                if (error) throw error;
                 if (document.getElementById('cfg_popup_active')) document.getElementById('cfg_popup_active').checked = false;
                 if (document.getElementById('cfg_popup_title')) document.getElementById('cfg_popup_title').value = '';
                 if (document.getElementById('cfg_popup_msg')) document.getElementById('cfg_popup_msg').value = '';
                 if (document.getElementById('cfg_popup_image')) document.getElementById('cfg_popup_image').value = '';
-                showToast('📢 Global Announcement Popup Deleted & Removed from App!');
+                showToast('📢 Global Announcement Disabled & Removed from App!');
+                loadAppSettings();
+                loadPublishedPopups();
             } catch (e) { showToast('Popup Delete Error: ' + e.message, true); }
+        }
+
+        async function loadPublishedPopups() {
+            if (!supabaseClient) return;
+            const container = document.getElementById('publishedPopupsContainer');
+            if (!container) return;
+            container.innerHTML = '<p style="color:var(--text-muted); font-size:11px;">Fetching published announcements from Supabase...</p>';
+            try {
+                const { data } = await supabaseClient.from(_0xdec(0x5))
+                    .select('key, value')
+                    .in('key', ['popup_announcements_list', 'popup_active', 'popup_title', 'popup_msg', 'popup_image', 'popup_date', 'popup_updated_at']);
+                
+                const map = {};
+                if (data && Array.isArray(data)) {
+                    data.forEach(r => { map[r.key] = r.value; });
+                }
+
+                let list = [];
+                if (map['popup_announcements_list']) {
+                    try { list = JSON.parse(map['popup_announcements_list']); } catch (_) { list = []; }
+                }
+
+                const isAppActive = map['popup_active'] === 'true';
+                const activeTitle = (map['popup_title'] || '').trim();
+                const activeMsg = (map['popup_msg'] || '').trim();
+
+                // If list is empty but an active announcement exists, seed it
+                if ((!Array.isArray(list) || list.length === 0) && (activeTitle || activeMsg)) {
+                    list = [{
+                        id: 'pop_legacy',
+                        title: activeTitle,
+                        message: activeMsg,
+                        imageUrl: map['popup_image'] || '',
+                        date: map['popup_date'] || '',
+                        isActive: isAppActive,
+                        updatedAt: parseInt(map['popup_updated_at'] || Date.now().toString())
+                    }];
+                }
+
+                if (!Array.isArray(list) || list.length === 0) {
+                    container.innerHTML = `
+                    <div style="background: var(--surface-bg); border: 1px dashed var(--border-color); border-radius: 10px; padding: 18px; text-align: center;">
+                        <p style="color: var(--text-muted); font-size: 11.5px; margin: 0;">ℹ️ Abhi koi published popup announcement nahi hai. Upar form bharkar <b>"📢 PUBLISH POPUP ANNOUNCEMENT"</b> par click karein.</p>
+                    </div>`;
+                    return;
+                }
+
+                container.innerHTML = list.map(item => {
+                    const isCurrentlyLive = isAppActive && (item.isActive || (activeTitle && item.title === activeTitle));
+                    const statusBadge = isCurrentlyLive
+                        ? `<span style="background:rgba(16,185,129,0.18); color:var(--success); border:1px solid rgba(16,185,129,0.4); font-size:10px; padding:3px 8px; border-radius:20px; font-weight:700;">🟢 LIVE IN APP</span>`
+                        : `<span style="background:rgba(148,163,184,0.12); color:var(--text-muted); border:1px solid var(--border-color); font-size:10px; padding:3px 8px; border-radius:20px; font-weight:600;">⚪ INACTIVE</span>`;
+                    
+                    const dateChip = item.date ? `<span style="background:rgba(59,130,246,0.15); color:var(--primary); font-size:10px; padding:2px 7px; border-radius:6px; font-weight:600;">📅 ${item.date}</span>` : '';
+                    
+                    const imgThumb = item.imageUrl
+                        ? `<img src="${item.imageUrl}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border-color); margin-right: 12px; flex-shrink: 0;" onerror="this.style.display='none'">`
+                        : '';
+
+                    const safeTitle = (item.title || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                    const safeMsg = (item.message || '').replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n');
+                    const safeImg = (item.imageUrl || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+                    return `
+                    <div style="background: var(--surface-bg); border: 1px solid ${isCurrentlyLive ? 'var(--primary)' : 'var(--border-color)'}; border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap;">
+                            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                ${statusBadge}
+                                ${dateChip}
+                            </div>
+                            <div style="display: flex; gap: 6px;">
+                                ${!isCurrentlyLive ? `<button class="btn btn-primary" style="font-size: 10px; padding: 4px 8px;" onclick="activatePopupFromList('${item.id}')">⚡ Set Live</button>` : ''}
+                                <button class="btn btn-secondary" style="font-size: 10px; padding: 4px 8px;" onclick="loadPopupIntoForm('${safeTitle}', '${safeMsg}', '${safeImg}')">✏️ Edit</button>
+                                <button class="btn btn-danger" style="font-size: 10px; padding: 4px 8px;" onclick="deletePopupFromList('${item.id}')">🗑️ Delete</button>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; align-items: center; margin-top: 2px;">
+                            ${imgThumb}
+                            <div style="flex: 1; min-width: 0;">
+                                <h4 style="font-size: 13px; font-weight: 700; color: var(--text-main); margin-bottom: 3px; word-break: break-word;">${item.title || '(No Title)'}</h4>
+                                <p style="font-size: 11px; color: var(--text-muted); line-height: 1.4; word-break: break-word; white-space: pre-line;">${item.message || ''}</p>
+                            </div>
+                        </div>
+                    </div>
+                    `;
+                }).join('');
+            } catch (e) {
+                container.innerHTML = '<p style="color:var(--text-muted); font-size:11px;">Error loading announcements: ' + (e.message || e) + '</p>';
+            }
+        }
+
+        async function deletePopupFromList(popupId) {
+            if (!supabaseClient) return;
+            if (!confirm('Are you sure you want to delete this popup announcement?')) return;
+            try {
+                let popupList = [];
+                const { data } = await supabaseClient.from(_0xdec(0x5)).select('value').eq('key', 'popup_announcements_list').maybeSingle();
+                if (data && data.value) {
+                    try { popupList = JSON.parse(data.value); } catch (_) { popupList = []; }
+                }
+                if (!Array.isArray(popupList)) popupList = [];
+
+                const targetItem = popupList.find(p => p.id === popupId);
+                const wasActive = targetItem ? targetItem.isActive : false;
+
+                popupList = popupList.filter(p => p.id !== popupId);
+
+                const nowTs = Date.now().toString();
+                const updates = [
+                    { key: 'popup_announcements_list', value: JSON.stringify(popupList) }
+                ];
+
+                if (wasActive || popupList.length === 0) {
+                    updates.push(
+                        { key: 'popup_active', value: 'false' },
+                        { key: 'popup_title', value: '' },
+                        { key: 'popup_msg', value: '' },
+                        { key: 'popup_image', value: '' },
+                        { key: 'popup_date', value: '' },
+                        { key: 'popup_updated_at', value: nowTs }
+                    );
+                    if (document.getElementById('cfg_popup_active')) document.getElementById('cfg_popup_active').checked = false;
+                    if (document.getElementById('cfg_popup_title')) document.getElementById('cfg_popup_title').value = '';
+                    if (document.getElementById('cfg_popup_msg')) document.getElementById('cfg_popup_msg').value = '';
+                    if (document.getElementById('cfg_popup_image')) document.getElementById('cfg_popup_image').value = '';
+                }
+
+                const { error } = await supabaseClient.from(_0xdec(0x5)).upsert(updates, { onConflict: 'key' });
+                if (error) throw error;
+                showToast('📢 Announcement deleted from list and app!');
+                loadAppSettings();
+                loadPublishedPopups();
+            } catch (e) {
+                showToast('Delete Error: ' + e.message, true);
+            }
+        }
+
+        async function activatePopupFromList(popupId) {
+            if (!supabaseClient) return;
+            try {
+                let popupList = [];
+                const { data } = await supabaseClient.from(_0xdec(0x5)).select('value').eq('key', 'popup_announcements_list').maybeSingle();
+                if (data && data.value) {
+                    try { popupList = JSON.parse(data.value); } catch (_) { popupList = []; }
+                }
+                if (!Array.isArray(popupList)) return;
+
+                let selectedItem = null;
+                popupList = popupList.map(p => {
+                    if (p.id === popupId) {
+                        selectedItem = { ...p, isActive: true };
+                        return selectedItem;
+                    } else {
+                        return { ...p, isActive: false };
+                    }
+                });
+
+                if (!selectedItem) return;
+
+                const nowTs = Date.now().toString();
+                const { error } = await supabaseClient.from(_0xdec(0x5)).upsert([
+                    { key: 'popup_active', value: 'true' },
+                    { key: 'popup_title', selectedItem.title || '' },
+                    { key: 'popup_msg', selectedItem.message || '' },
+                    { key: 'popup_image', selectedItem.imageUrl || '' },
+                    { key: 'popup_date', selectedItem.date || '' },
+                    { key: 'popup_updated_at', nowTs },
+                    { key: 'popup_announcements_list', value: JSON.stringify(popupList) }
+                ], { onConflict: 'key' });
+                if (error) throw error;
+
+                if (document.getElementById('cfg_popup_active')) document.getElementById('cfg_popup_active').checked = true;
+                if (document.getElementById('cfg_popup_title')) document.getElementById('cfg_popup_title').value = selectedItem.title || '';
+                if (document.getElementById('cfg_popup_msg')) document.getElementById('cfg_popup_msg').value = selectedItem.message || '';
+                if (document.getElementById('cfg_popup_image')) document.getElementById('cfg_popup_image').value = selectedItem.imageUrl || '';
+
+                showToast('⚡ Announcement activated and synced live to app!');
+                loadAppSettings();
+                loadPublishedPopups();
+            } catch (e) {
+                showToast('Activation Error: ' + e.message, true);
+            }
+        }
+
+        function loadPopupIntoForm(title, msg, image) {
+            if (document.getElementById('cfg_popup_title')) document.getElementById('cfg_popup_title').value = title;
+            if (document.getElementById('cfg_popup_msg')) document.getElementById('cfg_popup_msg').value = msg;
+            if (document.getElementById('cfg_popup_image')) document.getElementById('cfg_popup_image').value = image;
+            document.getElementById('cfg_popup_title')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            showToast('Announcement loaded into form above!');
         }
 
         async function verifyAndApprovePayment() {
@@ -2413,7 +2742,9 @@
                 { key: 'monthly_price', value: monConfig.monthly_price },
                 { key: 'quarterly_price', value: monConfig.quarterly_price },
                 { key: 'yearly_price', value: monConfig.yearly_price },
-                { key: 'lifetime_price', value: monConfig.lifetime_price }
+                { key: 'lifetime_price', value: monConfig.lifetime_price },
+                { key: 'gateway_mode', value: monConfig.gateway_mode },
+                { key: 'free_user_trade_limit', value: monConfig.free_user_trade_limit.toString() }
             ];
 
             try {
@@ -2668,6 +2999,11 @@ window['quickTogglePro'] = quickTogglePro;
 window['quickRevokeUserSession'] = quickRevokeUserSession;
 window['promptSendUserAlert'] = promptSendUserAlert;
 window['quickDeleteUserAccount'] = quickDeleteUserAccount;
+window['publishPopupAnnouncement'] = publishPopupAnnouncement;
+window['loadPublishedPopups'] = loadPublishedPopups;
+window['deletePopupFromList'] = deletePopupFromList;
+window['activatePopupFromList'] = activatePopupFromList;
+window['loadPopupIntoForm'] = loadPopupIntoForm;
 window['saveSystemConfig'] = saveSystemConfig;
 window['deletePopupAnnouncement'] = deletePopupAnnouncement;
 window['verifyAndApprovePayment'] = verifyAndApprovePayment;
