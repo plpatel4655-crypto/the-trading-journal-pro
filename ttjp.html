@@ -2359,11 +2359,11 @@
                 const nowTs = Date.now().toString();
                 const { error } = await supabaseClient.from(_0xdec(0x5)).upsert([
                     { key: 'popup_active', value: 'true' },
-                    { key: 'popup_title', selectedItem.title || '' },
-                    { key: 'popup_msg', selectedItem.message || '' },
-                    { key: 'popup_image', selectedItem.imageUrl || '' },
-                    { key: 'popup_date', selectedItem.date || '' },
-                    { key: 'popup_updated_at', nowTs },
+                    { key: 'popup_title', value: selectedItem.title || '' },
+                    { key: 'popup_msg', value: selectedItem.message || '' },
+                    { key: 'popup_image', value: selectedItem.imageUrl || '' },
+                    { key: 'popup_date', value: selectedItem.date || '' },
+                    { key: 'popup_updated_at', value: nowTs },
                     { key: 'popup_announcements_list', value: JSON.stringify(popupList) }
                 ], { onConflict: 'key' });
                 if (error) throw error;
