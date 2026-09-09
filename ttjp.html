@@ -819,7 +819,20 @@
                         <div class="form-group"><label>Monthly Plan Price (₹)</label><input type="text" id="cfg_monthly_price" class="form-control" value="499"></div>
                         <div class="form-group"><label>Quarterly Plan Price (₹)</label><input type="text" id="cfg_quarterly_price" class="form-control" value="1299"></div>
                         <div class="form-group"><label>Yearly Plan Price (₹)</label><input type="text" id="cfg_yearly_price" class="form-control" value="3999"></div>
-                        <div class="form-group"><label>Lifetime Price (₹)</label><input type="text" id="cfg_lifetime_price" class="form-control" value="7999"></div>
+                        <div class="form-group"><label>Lifetime Original Price (₹) (Shown Strikethrough ~~₹2499~~)</label><input type="text" id="cfg_lifetime_price" class="form-control" value="7999"></div>
+                    </div>
+                    <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border-color);">
+                        <div class="toggle-row" style="margin-bottom: 12px;">
+                            <div class="toggle-info">
+                                <h4>Enable Limited-Time Launch Offer</h4>
+                                <p>Show strikethrough original price & highlight offer price</p>
+                            </div>
+                            <label class="switch"><input type="checkbox" id="cfg_intro_enabled" checked onchange="toggleIntroPriceInput()"><span class="slider"></span></label>
+                        </div>
+                        <div class="form-group" id="intro_price_container" style="margin-bottom: 0;">
+                            <label>Launch Offer Discounted Price (₹) (e.g. ₹1499)</label>
+                            <input type="text" id="cfg_intro_price" class="form-control" value="1299" placeholder="1299" style="max-width: 320px; font-weight: 700; color: var(--accent);">
+                        </div>
                     </div>
                 </div>
 
@@ -1280,6 +1293,11 @@
                         if (monObj.quarterly_price && document.getElementById('cfg_quarterly_price')) document.getElementById('cfg_quarterly_price').value = monObj.quarterly_price;
                         if (monObj.yearly_price && document.getElementById('cfg_yearly_price')) document.getElementById('cfg_yearly_price').value = monObj.yearly_price;
                         if (monObj.lifetime_price && document.getElementById('cfg_lifetime_price')) document.getElementById('cfg_lifetime_price').value = monObj.lifetime_price;
+                        if (monObj.intro_enabled !== undefined && document.getElementById('cfg_intro_enabled')) {
+                            document.getElementById('cfg_intro_enabled').checked = !!monObj.intro_enabled;
+                            toggleIntroPriceInput();
+                        }
+                        if (monObj.intro_price && document.getElementById('cfg_intro_price')) document.getElementById('cfg_intro_price').value = monObj.intro_price;
 
                         if (monObj.min_version_code && document.getElementById('cfg_min_version')) document.getElementById('cfg_min_version').value = monObj.min_version_code;
                         if (monObj.force_update_enabled !== undefined && document.getElementById('cfg_force_update_enabled')) document.getElementById('cfg_force_update_enabled').checked = !!monObj.force_update_enabled;
@@ -1308,6 +1326,11 @@
                 if (map['quarterly_price'] && document.getElementById('cfg_quarterly_price')) document.getElementById('cfg_quarterly_price').value = map['quarterly_price'];
                 if (map['yearly_price'] && document.getElementById('cfg_yearly_price')) document.getElementById('cfg_yearly_price').value = map['yearly_price'];
                 if (map['lifetime_price'] && document.getElementById('cfg_lifetime_price')) document.getElementById('cfg_lifetime_price').value = map['lifetime_price'];
+                if (map['intro_enabled'] !== undefined && document.getElementById('cfg_intro_enabled')) {
+                    document.getElementById('cfg_intro_enabled').checked = map['intro_enabled'] === 'true';
+                    toggleIntroPriceInput();
+                }
+                if (map['intro_price'] && document.getElementById('cfg_intro_price')) document.getElementById('cfg_intro_price').value = map['intro_price'];
                 if (map['gateway_mode'] && document.getElementById('cfg_gateway_mode')) document.getElementById('cfg_gateway_mode').value = map['gateway_mode'];
                 if (map['free_user_trade_limit'] && document.getElementById('cfg_free_user_trade_limit')) document.getElementById('cfg_free_user_trade_limit').value = map['free_user_trade_limit'];
 
@@ -2004,6 +2027,14 @@
             }
         }
 
+        function toggleIntroPriceInput() {
+            const chk = document.getElementById('cfg_intro_enabled');
+            const cont = document.getElementById('intro_price_container');
+            if (cont) {
+                cont.style.display = (chk && chk.checked) ? 'block' : 'none';
+            }
+        }
+
         function getMonetizationConfigPayload() {
             const isGlobalAds = document.getElementById('cfg_global_ads') ? document.getElementById('cfg_global_ads').checked : true;
             const isProPaywall = document.getElementById('cfg_pro_paywall') ? document.getElementById('cfg_pro_paywall').checked : true;
@@ -2019,6 +2050,8 @@
             const quarterlyPrice = document.getElementById('cfg_quarterly_price') ? document.getElementById('cfg_quarterly_price').value.trim() : '1299';
             const yearlyPrice = document.getElementById('cfg_yearly_price') ? document.getElementById('cfg_yearly_price').value.trim() : '3999';
             const lifetimePrice = document.getElementById('cfg_lifetime_price') ? document.getElementById('cfg_lifetime_price').value.trim() : '7999';
+            const isIntroEnabled = document.getElementById('cfg_intro_enabled') ? document.getElementById('cfg_intro_enabled').checked : true;
+            const introPrice = document.getElementById('cfg_intro_price') ? document.getElementById('cfg_intro_price').value.trim() : '1299';
 
             const minVersion = document.getElementById('cfg_min_version') ? document.getElementById('cfg_min_version').value.trim() : '1.0.2';
             const isForceUpdate = document.getElementById('cfg_force_update_enabled') ? document.getElementById('cfg_force_update_enabled').checked : false;
@@ -2039,8 +2072,8 @@
                 quarterly_price: quarterlyPrice,
                 yearly_price: yearlyPrice,
                 lifetime_price: lifetimePrice,
-                intro_price: "1199",
-                intro_enabled: true,
+                intro_price: introPrice,
+                intro_enabled: isIntroEnabled,
                 min_version_code: minVersion,
                 force_update_enabled: isForceUpdate,
                 gateway_mode: gatewayMode,
@@ -2743,6 +2776,8 @@
                 { key: 'quarterly_price', value: monConfig.quarterly_price },
                 { key: 'yearly_price', value: monConfig.yearly_price },
                 { key: 'lifetime_price', value: monConfig.lifetime_price },
+                { key: 'intro_enabled', value: monConfig.intro_enabled ? 'true' : 'false' },
+                { key: 'intro_price', value: monConfig.intro_price },
                 { key: 'gateway_mode', value: monConfig.gateway_mode },
                 { key: 'free_user_trade_limit', value: monConfig.free_user_trade_limit.toString() }
             ];
