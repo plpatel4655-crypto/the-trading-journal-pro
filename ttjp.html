@@ -517,8 +517,10 @@
                     <div class="form-group"><label>Popup Message Text</label><textarea id="cfg_popup_msg" class="form-control" rows="2" placeholder="Message to show in popup..."></textarea></div>
                     <div class="form-group"><label>Popup Banner Image URL (Optional)</label><input type="text" id="cfg_popup_image" class="form-control" placeholder="https://example.com/banner.png"></div>
                     
+                    <input type="hidden" id="editing_popup_id" value="">
                     <div style="display: flex; gap: 10px; margin-top: 12px;">
-                        <button class="btn btn-primary" style="flex: 2; padding: 10px;" onclick="publishPopupAnnouncement()">📢 PUBLISH POPUP ANNOUNCEMENT</button>
+                        <button id="btn_publish_popup" class="btn btn-primary" style="flex: 2; padding: 10px;" onclick="publishPopupAnnouncement()">📢 PUBLISH POPUP ANNOUNCEMENT</button>
+                        <button id="btn_cancel_edit_popup" class="btn btn-secondary" style="display: none; padding: 10px;" onclick="cancelPopupEdit()">✕ Cancel Edit</button>
                         <button class="btn btn-danger" style="flex: 1; padding: 10px;" onclick="deletePopupAnnouncement()">🗑️ DELETE POPUP</button>
                     </div>
 
@@ -2135,6 +2137,7 @@
             const title = document.getElementById('cfg_popup_title') ? document.getElementById('cfg_popup_title').value.trim() : '';
             const msg = document.getElementById('cfg_popup_msg') ? document.getElementById('cfg_popup_msg').value.trim() : '';
             const img = document.getElementById('cfg_popup_image') ? document.getElementById('cfg_popup_image').value.trim() : '';
+            const editingId = document.getElementById('editing_popup_id') ? document.getElementById('editing_popup_id').value.trim() : '';
 
             if (!title && !msg) {
                 showToast('Please enter at least a Title or Message for the popup!', true);
@@ -2164,17 +2167,35 @@
                 // Mark previous active items as inactive
                 popupList = popupList.map(p => ({ ...p, isActive: false }));
 
-                const newItem = {
-                    id: 'pop_' + nowTs,
-                    title: title,
-                    message: msg,
-                    imageUrl: img,
-                    date: todayStr,
-                    isActive: true,
-                    updatedAt: parseInt(nowTs)
-                };
+                let isUpdate = false;
+                if (editingId) {
+                    const existingIndex = popupList.findIndex(p => p.id === editingId);
+                    if (existingIndex !== -1) {
+                        popupList[existingIndex] = {
+                            ...popupList[existingIndex],
+                            title: title,
+                            message: msg,
+                            imageUrl: img,
+                            isActive: true,
+                            updatedAt: parseInt(nowTs)
+                        };
+                        isUpdate = true;
+                    }
+                }
 
-                popupList.unshift(newItem);
+                if (!isUpdate) {
+                    const newItem = {
+                        id: 'pop_' + nowTs,
+                        title: title,
+                        message: msg,
+                        imageUrl: img,
+                        date: todayStr,
+                        isActive: true,
+                        updatedAt: parseInt(nowTs)
+                    };
+                    popupList.unshift(newItem);
+                }
+
                 popupList = popupList.slice(0, 30);
 
                 const { error } = await supabaseClient.from(_0xdec(0x5)).upsert([
@@ -2187,7 +2208,9 @@
                     { key: 'popup_announcements_list', value: JSON.stringify(popupList) }
                 ], { onConflict: 'key' });
                 if (error) throw error;
-                showToast('📢 Global Announcement Popup Published & Added to List!');
+
+                cancelPopupEdit();
+                showToast(isUpdate ? '📝 Announcement Updated & Synced Live to App!' : '📢 Global Announcement Popup Published & Added to List!');
                 loadAppSettings();
                 loadPublishedPopups();
             } catch (err) {
@@ -2301,7 +2324,7 @@
                             </div>
                             <div style="display: flex; gap: 6px;">
                                 ${!isCurrentlyLive ? `<button class="btn btn-primary" style="font-size: 10px; padding: 4px 8px;" onclick="activatePopupFromList('${item.id}')">⚡ Set Live</button>` : ''}
-                                <button class="btn btn-secondary" style="font-size: 10px; padding: 4px 8px;" onclick="loadPopupIntoForm('${safeTitle}', '${safeMsg}', '${safeImg}')">✏️ Edit</button>
+                                <button class="btn btn-secondary" style="font-size: 10.5px; padding: 4px 10px;" onclick="loadPopupIntoForm('${item.id}', '${safeTitle}', '${safeMsg}', '${safeImg}')">✏️ Edit</button>
                                 <button class="btn btn-danger" style="font-size: 10px; padding: 4px 8px;" onclick="deletePopupFromList('${item.id}')">🗑️ Delete</button>
                             </div>
                         </div>
@@ -2414,12 +2437,33 @@
             }
         }
 
-        function loadPopupIntoForm(title, msg, image) {
-            if (document.getElementById('cfg_popup_title')) document.getElementById('cfg_popup_title').value = title;
-            if (document.getElementById('cfg_popup_msg')) document.getElementById('cfg_popup_msg').value = msg;
-            if (document.getElementById('cfg_popup_image')) document.getElementById('cfg_popup_image').value = image;
+        function loadPopupIntoForm(id, title, msg, image) {
+            if (document.getElementById('editing_popup_id')) document.getElementById('editing_popup_id').value = id || '';
+            if (document.getElementById('cfg_popup_title')) document.getElementById('cfg_popup_title').value = title || '';
+            if (document.getElementById('cfg_popup_msg')) document.getElementById('cfg_popup_msg').value = msg || '';
+            if (document.getElementById('cfg_popup_image')) document.getElementById('cfg_popup_image').value = image || '';
+
+            const btnPub = document.getElementById('btn_publish_popup');
+            const btnCancel = document.getElementById('btn_cancel_edit_popup');
+            if (btnPub) {
+                btnPub.innerText = '📝 UPDATE POPUP ANNOUNCEMENT';
+                btnPub.className = 'btn btn-success';
+            }
+            if (btnCancel) btnCancel.style.display = 'inline-block';
+
             document.getElementById('cfg_popup_title')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            showToast('Announcement loaded into form above!');
+            showToast('✏️ Announcement loaded into form! Edit fields and click UPDATE.');
+        }
+
+        function cancelPopupEdit() {
+            if (document.getElementById('editing_popup_id')) document.getElementById('editing_popup_id').value = '';
+            const btnPub = document.getElementById('btn_publish_popup');
+            const btnCancel = document.getElementById('btn_cancel_edit_popup');
+            if (btnPub) {
+                btnPub.innerText = '📢 PUBLISH POPUP ANNOUNCEMENT';
+                btnPub.className = 'btn btn-primary';
+            }
+            if (btnCancel) btnCancel.style.display = 'none';
         }
 
         async function verifyAndApprovePayment() {
