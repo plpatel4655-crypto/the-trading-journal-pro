@@ -841,9 +841,13 @@
                 <div class="panel-card">
                     <h3>⭐ PAYWALL LIVE SOCIAL PROOF & TRADER RATING</h3>
                     <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">Live trust badge & trader count shown on the Upgrade to Premium Paywall Screen. Updates live in users' apps in real-time!</p>
-                    <div class="form-group" style="margin-bottom: 0;">
+                    <div class="form-group" style="margin-bottom: 12px;">
                         <label>Social Proof Badge Text (e.g. ⭐ 4.9/5 (1,200+ Traders))</label>
                         <input type="text" id="cfg_social_proof" class="form-control" value="⭐ 4.9/5 (1,200+ Traders)" placeholder="⭐ 4.9/5 (1,200+ Traders)" style="font-weight: 700;">
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-primary" style="padding: 10px 18px; font-weight: 800;" onclick="saveSocialProofBadge()">💾 PUBLISH SOCIAL PROOF TO LIVE APP</button>
+                        <button class="btn btn-secondary" style="padding: 10px 14px;" onclick="loadAppSettings()">🔄 RELOAD CURRENT</button>
                     </div>
                 </div>
 
@@ -894,7 +898,7 @@
                 <input type="password" id="loginAdminPin" class="form-control" style="padding: 11px;" placeholder="Enter Security PIN / Password" autocomplete="new-password" onkeydown="if(event.key === 'Enter') doAdminLogin()">
             </div>
 
-            <button class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 13px; margin-top: 10px;" onclick="doAdminLogin()">🔐 LOGIN NOW</button>
+            <button class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 13px; margin-top: 10px;" onclick="doAdminLogin()">🔐 LOGIN TO SUPER ADMIN PANEL</button>
             <p style="font-size: 10.5px; color: var(--text-muted); margin-top: 16px;">Protected by Supabase Cloud Security</p>
         </div>
     </div>
@@ -988,7 +992,7 @@
                 </div>
                 <div class="form-group">
                     <label>Subscription Expiry Date</label>
-                    <input type="text" id="editUserSubExpiry" class="form-control" placeholder="YYYY-MM-DD (e.g. 2026-12-31)">
+                    <input type="text" id="editUserSubExpiry" class="form-control" placeholder="DD-MM-YYYY (e.g. 31-12-2026)">
                 </div>
             </div>
 
@@ -1047,11 +1051,11 @@
             <div class="grid-2">
                 <div class="form-group">
                     <label>Subscription Start Date</label>
-                    <input type="text" id="grantStartDate" class="form-control" placeholder="YYYY-MM-DD">
+                    <input type="text" id="grantStartDate" class="form-control" placeholder="DD-MM-YYYY">
                 </div>
                 <div class="form-group">
                     <label>Subscription Expiry Date</label>
-                    <input type="text" id="grantExpiryDate" class="form-control" placeholder="YYYY-MM-DD or Lifetime">
+                    <input type="text" id="grantExpiryDate" class="form-control" placeholder="DD-MM-YYYY or Lifetime">
                 </div>
             </div>
 
@@ -1075,6 +1079,48 @@
         var _0xstr = _0xarr[_0xidx];
         return decodeURIComponent(escape(atob(_0xstr)));
     };
+
+    function formatToDDMMYYYY(val) {
+        if (!val) return '';
+        try {
+            const str = String(val).trim();
+            // If already DD-MM-YYYY (e.g. 11-09-2026)
+            if (/^\d{2}-\d{2}-\d{4}/.test(str)) {
+                return str.substring(0, 10);
+            }
+            // If YYYY-MM-DD (e.g. 2026-09-11 or ISO string 2026-09-11T...)
+            if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
+                const parts = str.substring(0, 10).split('-');
+                return `${parts[2]}-${parts[1]}-${parts[0]}`;
+            }
+            const d = new Date(val);
+            if (!isNaN(d.getTime())) {
+                const dd = String(d.getDate()).padStart(2, '0');
+                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                const yyyy = d.getFullYear();
+                return `${dd}-${mm}-${yyyy}`;
+            }
+            return str;
+        } catch (_) {
+            return String(val);
+        }
+    }
+
+    function parseDateString(str) {
+        if (!str) return new Date();
+        const parts = String(str).trim().split('-');
+        if (parts.length === 3) {
+            if (parts[0].length === 2 && parts[2].length === 4) {
+                // DD-MM-YYYY
+                return new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+            } else if (parts[0].length === 4 && parts[2].length === 2) {
+                // YYYY-MM-DD
+                return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+            }
+        }
+        const d = new Date(str);
+        return isNaN(d.getTime()) ? new Date() : d;
+    }
 
 
         function showDashboard() {
@@ -1145,7 +1191,10 @@
             if (tabName === 'analytics') updateChartsData();
             if (tabName === 'payments') loadPaymentLogs();
             if (tabName === _0xdec(0xf)) loadPublishedGuides();
-            if (tabName === 'settings') { loadAppSettings(); try { loadPublishedPopups(); } catch (_) {} }
+            if (tabName === 'settings' || tabName === 'monetization' || tabName === 'system') { 
+                loadAppSettings(); 
+                try { loadPublishedPopups(); } catch (_) {} 
+            }
         }
 
         function toggleAudioAlerts() {
@@ -1421,7 +1470,7 @@
                             <span style="font-size:10.5px; color:var(--primary); font-weight:700;">#${t.ticket_number || t.ticketNumber || 'TKT'}</span>
                         </div>
                         <p style="font-size:11.5px; font-weight:600; margin-top:2px;">Subject: ${t.subject || 'Query'}</p>
-                        <p style="font-size:10px; color:var(--text-muted); margin-top:2px;">Category: ${t.category || 'General'} • Date: ${(t.created_at || '').substring(0,10)}</p>
+                        <p style="font-size:10px; color:var(--text-muted); margin-top:2px;">Category: ${t.category || 'General'} • Date: ${formatToDDMMYYYY(t.created_at)}</p>
                     </div>
                     <span class="status-chip status-${(t.status ? t.status.toLowerCase().replace(' ', '') : 'open')}">${t.status || 'OPEN'}</span>
                 </div>
@@ -1622,7 +1671,8 @@
                 const shortId = (u.id || '').substring(0, 8);
                 const emailStr = u.email || 'N/A';
                 const nameStr = u.username || 'Trader';
-                const dateStr = (u.updated_at || u.created_at || u.createdAt || 'Active User').substring(0, 10);
+                const rawDate = u.updated_at || u.created_at || u.createdAt;
+                const dateStr = rawDate ? formatToDDMMYYYY(rawDate) : 'Active User';
                 const isPro = !!u.is_pro;
                 const isDeviceBound = u.active_device_id && u.active_device_id.length > 0;
 
@@ -1666,7 +1716,7 @@
             document.getElementById('editUserMobile').value = activeEditingUserObj.mobile_number || '';
             document.getElementById('editUserIsPro').value = activeEditingUserObj.is_pro ? 'true' : 'false';
             document.getElementById('editUserSubPlan').value = activeEditingUserObj.subscription_plan || (activeEditingUserObj.is_pro ? 'lifetime' : 'free');
-            document.getElementById('editUserSubExpiry').value = activeEditingUserObj.subscription_expiry_date || '';
+            document.getElementById('editUserSubExpiry').value = formatToDDMMYYYY(activeEditingUserObj.subscription_expiry_date) || '';
             document.getElementById('editUserActiveDevice').value = activeEditingUserObj.active_device_id || '';
 
             document.getElementById('editUserProfileModal').style.display = 'flex';
@@ -1731,8 +1781,8 @@
             document.getElementById('grantUserEmailLabel').innerText = "User: " + (activeGrantUserObj.email || activeGrantUserObj.username || 'Trader');
             document.getElementById('grantUserIdLabel').innerText = "User ID: " + activeGrantUserObj.id;
 
-            const todayStr = new Date().toISOString().substring(0, 10);
-            document.getElementById('grantStartDate').value = activeGrantUserObj.subscription_start_date || todayStr;
+            const todayStr = formatToDDMMYYYY(new Date());
+            document.getElementById('grantStartDate').value = formatToDDMMYYYY(activeGrantUserObj.subscription_start_date) || todayStr;
             document.getElementById('grantPlanSelect').value = activeGrantUserObj.subscription_plan || (activeGrantUserObj.is_pro ? 'lifetime' : 'monthly');
             document.getElementById('grantTxnNote').value = "ADMIN_GRANT_" + Date.now().toString().substring(7);
 
@@ -1747,23 +1797,23 @@
 
         function autoCalculateExpiryDate() {
             const plan = document.getElementById('grantPlanSelect').value;
-            const startDateVal = document.getElementById('grantStartDate').value.trim() || new Date().toISOString().substring(0, 10);
-            const startDate = new Date(startDateVal);
+            const startDateVal = document.getElementById('grantStartDate').value.trim() || formatToDDMMYYYY(new Date());
+            const startDate = parseDateString(startDateVal);
 
             if (plan === 'lifetime') {
-                document.getElementById('grantExpiryDate').value = '2099-12-31';
+                document.getElementById('grantExpiryDate').value = '31-12-2099';
             } else if (plan === 'monthly') {
                 const exp = new Date(startDate);
                 exp.setDate(exp.getDate() + 30);
-                document.getElementById('grantExpiryDate').value = exp.toISOString().substring(0, 10);
+                document.getElementById('grantExpiryDate').value = formatToDDMMYYYY(exp);
             } else if (plan === 'quarterly') {
                 const exp = new Date(startDate);
                 exp.setDate(exp.getDate() + 90);
-                document.getElementById('grantExpiryDate').value = exp.toISOString().substring(0, 10);
+                document.getElementById('grantExpiryDate').value = formatToDDMMYYYY(exp);
             } else if (plan === 'yearly') {
                 const exp = new Date(startDate);
                 exp.setDate(exp.getDate() + 365);
-                document.getElementById('grantExpiryDate').value = exp.toISOString().substring(0, 10);
+                document.getElementById('grantExpiryDate').value = formatToDDMMYYYY(exp);
             } else {
                 document.getElementById('grantExpiryDate').value = '';
             }
@@ -2319,7 +2369,7 @@
                         ? `<span style="background:rgba(16,185,129,0.18); color:var(--success); border:1px solid rgba(16,185,129,0.4); font-size:10px; padding:3px 8px; border-radius:20px; font-weight:700;">🟢 LIVE IN APP</span>`
                         : `<span style="background:rgba(148,163,184,0.12); color:var(--text-muted); border:1px solid var(--border-color); font-size:10px; padding:3px 8px; border-radius:20px; font-weight:600;">⚪ INACTIVE</span>`;
                     
-                    const dateChip = item.date ? `<span style="background:rgba(59,130,246,0.15); color:var(--primary); font-size:10px; padding:2px 7px; border-radius:6px; font-weight:600;">📅 ${item.date}</span>` : '';
+                    const dateChip = item.date ? `<span style="background:rgba(59,130,246,0.15); color:var(--primary); font-size:10px; padding:2px 7px; border-radius:6px; font-weight:600;">📅 ${formatToDDMMYYYY(item.date)}</span>` : '';
                     
                     const imgThumb = item.imageUrl
                         ? `<img src="${item.imageUrl}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border-color); margin-right: 12px; flex-shrink: 0;" onerror="this.style.display='none'">`
@@ -2519,7 +2569,7 @@
                         <td>₹${p.amount || 499}</td>
                         <td>${p.provider || 'RAZORPAY'}</td>
                         <td><span class="status-chip status-resolved">${p.status || 'SUCCESS'}</span></td>
-                        <td>${(p.created_at || '').substring(0,10)}</td>
+                        <td>${formatToDDMMYYYY(p.created_at)}</td>
                     </tr>
                 `).join('');
             } catch (e) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No payment table found (Ready for production).</td></tr>'; }
@@ -2815,30 +2865,59 @@
             } catch (e) { showToast('Coupon Delete Error: ' + e.message, true); }
         }
 
+        async function saveSocialProofBadge() {
+            if (!supabaseClient) { showToast('Connect to Supabase first!', true); return; }
+            const input = document.getElementById('cfg_social_proof');
+            const val = input ? input.value.trim() : '';
+            if (!val) {
+                showToast('Please enter social proof text!', true);
+                return;
+            }
+
+            const nowIso = new Date().toISOString();
+            const monConfig = getMonetizationConfigPayload();
+            monConfig.social_proof_text = val;
+
+            const rows = [
+                { key: 'paywall_social_proof', value: val, updated_at: nowIso },
+                { key: _0xdec(0x6), value: JSON.stringify(monConfig), updated_at: nowIso }
+            ];
+
+            try {
+                const { error } = await supabaseClient.from(_0xdec(0x5)).upsert(rows, { onConflict: 'key' });
+                if (error) throw error;
+                showToast('⭐ Social Proof Badge Published to Supabase & Live App!');
+                loadAppSettings();
+            } catch (err) {
+                showToast('Save Error: ' + (err.message || err), true);
+            }
+        }
+
         async function saveMonetizationConfig() {
             if (!supabaseClient) { showToast('Connect to Supabase first!', true); return; }
 
             const monConfig = getMonetizationConfigPayload();
+            const nowIso = new Date().toISOString();
 
             const rows = [
-                { key: _0xdec(0x6), value: JSON.stringify(monConfig) },
-                { key: 'global_ads_enabled', value: monConfig.global_ads ? 'true' : 'false' },
-                { key: 'pro_paywall_enabled', value: monConfig.pro_paywall_enabled ? 'true' : 'false' },
-                { key: 'free_with_ads_enabled', value: monConfig.free_with_ads_enabled ? 'true' : 'false' },
-                { key: 'is_payment_enabled', value: monConfig.payment_enabled ? 'true' : 'false' },
-                { key: 'banner_enabled', value: monConfig.banner_ads ? 'true' : 'false' },
-                { key: 'native_enabled', value: monConfig.native_ads ? 'true' : 'false' },
-                { key: 'rewarded_enabled', value: monConfig.rewarded_ads ? 'true' : 'false' },
-                { key: 'interstitial_enabled', value: monConfig.interstitial_ads ? 'true' : 'false' },
-                { key: 'monthly_price', value: monConfig.monthly_price },
-                { key: 'quarterly_price', value: monConfig.quarterly_price },
-                { key: 'yearly_price', value: monConfig.yearly_price },
-                { key: 'lifetime_price', value: monConfig.lifetime_price },
-                { key: 'intro_enabled', value: monConfig.intro_enabled ? 'true' : 'false' },
-                { key: 'intro_price', value: monConfig.intro_price },
-                { key: 'gateway_mode', value: monConfig.gateway_mode },
-                { key: 'free_user_trade_limit', value: monConfig.free_user_trade_limit.toString() },
-                { key: 'paywall_social_proof', value: monConfig.social_proof_text || '⭐ 4.9/5 (1,200+ Traders)' }
+                { key: _0xdec(0x6), value: JSON.stringify(monConfig), updated_at: nowIso },
+                { key: 'global_ads_enabled', value: monConfig.global_ads ? 'true' : 'false', updated_at: nowIso },
+                { key: 'pro_paywall_enabled', value: monConfig.pro_paywall_enabled ? 'true' : 'false', updated_at: nowIso },
+                { key: 'free_with_ads_enabled', value: monConfig.free_with_ads_enabled ? 'true' : 'false', updated_at: nowIso },
+                { key: 'is_payment_enabled', value: monConfig.payment_enabled ? 'true' : 'false', updated_at: nowIso },
+                { key: 'banner_enabled', value: monConfig.banner_ads ? 'true' : 'false', updated_at: nowIso },
+                { key: 'native_enabled', value: monConfig.native_ads ? 'true' : 'false', updated_at: nowIso },
+                { key: 'rewarded_enabled', value: monConfig.rewarded_ads ? 'true' : 'false', updated_at: nowIso },
+                { key: 'interstitial_enabled', value: monConfig.interstitial_ads ? 'true' : 'false', updated_at: nowIso },
+                { key: 'monthly_price', value: monConfig.monthly_price, updated_at: nowIso },
+                { key: 'quarterly_price', value: monConfig.quarterly_price, updated_at: nowIso },
+                { key: 'yearly_price', value: monConfig.yearly_price, updated_at: nowIso },
+                { key: 'lifetime_price', value: monConfig.lifetime_price, updated_at: nowIso },
+                { key: 'intro_enabled', value: monConfig.intro_enabled ? 'true' : 'false', updated_at: nowIso },
+                { key: 'intro_price', value: monConfig.intro_price, updated_at: nowIso },
+                { key: 'gateway_mode', value: monConfig.gateway_mode, updated_at: nowIso },
+                { key: 'free_user_trade_limit', value: monConfig.free_user_trade_limit.toString(), updated_at: nowIso },
+                { key: 'paywall_social_proof', value: monConfig.social_proof_text || '⭐ 4.9/5 (1,200+ Traders)', updated_at: nowIso }
             ];
 
             try {
@@ -3115,6 +3194,7 @@ window['deletePromoBanner'] = deletePromoBanner;
 window['generateCouponCode'] = generateCouponCode;
 window['deleteCouponCode'] = deleteCouponCode;
 window['saveMonetizationConfig'] = saveMonetizationConfig;
+window['saveSocialProofBadge'] = saveSocialProofBadge;
 window['doAdminLogin'] = doAdminLogin;
 window['doAdminLogout'] = doAdminLogout;
 window['openAdminProfileModal'] = openAdminProfileModal;
