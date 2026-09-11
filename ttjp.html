@@ -502,6 +502,9 @@
                             <input type="password" id="cfg_admin_pin" class="form-control" placeholder="Enter 7-digit Admin PIN">
                         </div>
                     </div>
+                    <button class="btn btn-danger" style="width: 100%; padding: 12px; margin-top: 14px; font-weight: 700;" onclick="saveSystemConfig()">
+                        🚨 UPDATE SYSTEM EMERGENCY & MAINTENANCE MODE
+                    </button>
                 </div>
 
                 <div class="panel-card">
@@ -2804,12 +2807,14 @@
             const img = document.getElementById('promoImage').value.trim();
             if (!title) return;
 
+            const bannerId = Date.now().toString();
             try {
                 await supabaseClient.from(_0xdec(0x5)).upsert([
                     { key: 'promo_banner_active', value: active },
                     { key: 'promo_banner_title', value: title },
                     { key: 'promo_banner_image', value: img },
-                    { key: 'promo_banner_link', value: document.getElementById('promoLink').value.trim() }
+                    { key: 'promo_banner_link', value: document.getElementById('promoLink').value.trim() },
+                    { key: 'promo_banner_id', value: bannerId }
                 ], { onConflict: 'key' });
                 showToast(`🎯 Promotional Banner Published Successfully to App!`);
             } catch (e) { showToast('Banner publish: ' + e.message, true); }
@@ -2823,7 +2828,8 @@
                     { key: 'promo_banner_active', value: 'false' },
                     { key: 'promo_banner_title', value: '' },
                     { key: 'promo_banner_image', value: '' },
-                    { key: 'promo_banner_link', value: '' }
+                    { key: 'promo_banner_link', value: '' },
+                    { key: 'promo_banner_id', value: '' }
                 ], { onConflict: 'key' });
                 if (document.getElementById('cfg_promo_banner_active')) document.getElementById('cfg_promo_banner_active').checked = false;
                 if (document.getElementById('promoTitle')) document.getElementById('promoTitle').value = '';
