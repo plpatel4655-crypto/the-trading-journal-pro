@@ -839,6 +839,15 @@
                 </div>
 
                 <div class="panel-card">
+                    <h3>⭐ PAYWALL LIVE SOCIAL PROOF & TRADER RATING</h3>
+                    <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">Live trust badge & trader count shown on the Upgrade to Premium Paywall Screen. Updates live in users' apps in real-time!</p>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label>Social Proof Badge Text (e.g. ⭐ 4.9/5 (1,200+ Traders))</label>
+                        <input type="text" id="cfg_social_proof" class="form-control" value="⭐ 4.9/5 (1,200+ Traders)" placeholder="⭐ 4.9/5 (1,200+ Traders)" style="font-weight: 700;">
+                    </div>
+                </div>
+
+                <div class="panel-card">
                     <h3>💳 PAYMENT GATEWAY DISPLAY CONTROL</h3>
                     <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">Control which payment options users see on the Paywall Screen & Locked Feature Guards</p>
                     <div class="form-group">
@@ -1306,6 +1315,7 @@
                         if (monObj.admin_pin && document.getElementById('cfg_admin_pin')) document.getElementById('cfg_admin_pin').value = monObj.admin_pin;
                         if (monObj.gateway_mode && document.getElementById('cfg_gateway_mode')) document.getElementById('cfg_gateway_mode').value = monObj.gateway_mode;
                         if (monObj.free_user_trade_limit !== undefined && document.getElementById('cfg_free_user_trade_limit')) document.getElementById('cfg_free_user_trade_limit').value = monObj.free_user_trade_limit;
+                        if (monObj.social_proof_text && document.getElementById('cfg_social_proof')) document.getElementById('cfg_social_proof').value = monObj.social_proof_text;
                     } catch(e) {}
                 }
 
@@ -1335,6 +1345,7 @@
                 if (map['intro_price'] && document.getElementById('cfg_intro_price')) document.getElementById('cfg_intro_price').value = map['intro_price'];
                 if (map['gateway_mode'] && document.getElementById('cfg_gateway_mode')) document.getElementById('cfg_gateway_mode').value = map['gateway_mode'];
                 if (map['free_user_trade_limit'] && document.getElementById('cfg_free_user_trade_limit')) document.getElementById('cfg_free_user_trade_limit').value = map['free_user_trade_limit'];
+                if (map['paywall_social_proof'] && document.getElementById('cfg_social_proof')) document.getElementById('cfg_social_proof').value = map['paywall_social_proof'];
 
                 if (map['is_force_update_enabled'] !== undefined && document.getElementById('cfg_force_update_enabled')) document.getElementById('cfg_force_update_enabled').checked = map['is_force_update_enabled'] === 'true';
                 if (map['system_maintenance_mode'] !== undefined) {
@@ -2054,6 +2065,7 @@
             const lifetimePrice = document.getElementById('cfg_lifetime_price') ? document.getElementById('cfg_lifetime_price').value.trim() : '7999';
             const isIntroEnabled = document.getElementById('cfg_intro_enabled') ? document.getElementById('cfg_intro_enabled').checked : true;
             const introPrice = document.getElementById('cfg_intro_price') ? document.getElementById('cfg_intro_price').value.trim() : '1299';
+            const socialProofText = document.getElementById('cfg_social_proof') ? document.getElementById('cfg_social_proof').value.trim() : '⭐ 4.9/5 (1,200+ Traders)';
 
             const minVersion = document.getElementById('cfg_min_version') ? document.getElementById('cfg_min_version').value.trim() : '1.0.2';
             const isForceUpdate = document.getElementById('cfg_force_update_enabled') ? document.getElementById('cfg_force_update_enabled').checked : false;
@@ -2076,6 +2088,7 @@
                 lifetime_price: lifetimePrice,
                 intro_price: introPrice,
                 intro_enabled: isIntroEnabled,
+                social_proof_text: socialProofText,
                 min_version_code: minVersion,
                 force_update_enabled: isForceUpdate,
                 gateway_mode: gatewayMode,
@@ -2119,7 +2132,8 @@
                 { key: 'parser_upstox', value: document.getElementById('cfg_parser_upstox').checked ? 'true' : 'false' },
                 { key: 'parser_kotak', value: document.getElementById('cfg_parser_kotak').checked ? 'true' : 'false' },
                 { key: 'gateway_mode', value: monConfig.gateway_mode },
-                { key: 'free_user_trade_limit', value: monConfig.free_user_trade_limit.toString() }
+                { key: 'free_user_trade_limit', value: monConfig.free_user_trade_limit.toString() },
+                { key: 'paywall_social_proof', value: monConfig.social_proof_text || '⭐ 4.9/5 (1,200+ Traders)' }
             ];
 
             if (pin && pin.length === 7) rows.push({ key: _0xdec(0x7), value: pin });
@@ -2823,7 +2837,8 @@
                 { key: 'intro_enabled', value: monConfig.intro_enabled ? 'true' : 'false' },
                 { key: 'intro_price', value: monConfig.intro_price },
                 { key: 'gateway_mode', value: monConfig.gateway_mode },
-                { key: 'free_user_trade_limit', value: monConfig.free_user_trade_limit.toString() }
+                { key: 'free_user_trade_limit', value: monConfig.free_user_trade_limit.toString() },
+                { key: 'paywall_social_proof', value: monConfig.social_proof_text || '⭐ 4.9/5 (1,200+ Traders)' }
             ];
 
             try {
