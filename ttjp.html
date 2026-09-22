@@ -1943,6 +1943,7 @@
 
             try {
                 const notifId = 'notif_' + Date.now();
+                const nowIso = new Date().toISOString();
                 const { error } = await supabaseClient.from(_0xdec(0x10)).upsert([{
                     id: notifId,
                     title: title,
@@ -1950,10 +1951,16 @@
                     full_description: message,
                     category: 'ALERTS',
                     priority: 'HIGH',
+                    publish_date: nowIso,
+                    expiry_date: null,
                     created_by: _0xdec(0x2),
                     target_audience: 'SPECIFIC_USER',
                     target_user_ids: userId,
-                    created_at: new Date().toISOString()
+                    is_pinned: false,
+                    is_featured: false,
+                    is_read: false,
+                    is_bookmarked: false,
+                    created_at: nowIso
                 }]);
                 if (error) throw error;
                 showToast(`📩 Direct Push Alert Notification Sent Successfully to '${userStr}'!`);
