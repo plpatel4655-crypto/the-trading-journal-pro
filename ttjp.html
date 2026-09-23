@@ -1094,7 +1094,7 @@
 
             <div class="form-group">
                 <label>Notification Title <span style="color:var(--danger)">*</span></label>
-                <input type="text" id="broadcastTitle" class="form-control" placeholder="e.g. Major Feature Update & Market Alert" value="Trading Dashboard Pro Announcement">
+                <input type="text" id="broadcastTitle" class="form-control" placeholder="e.g. Major Feature Update & Market Alert" value="The Trading Journal Pro Announcement">
             </div>
 
             <div class="form-group">
@@ -2046,7 +2046,7 @@
             const uObj = allUsersList.find(u => u.id === userId);
             const userStr = uObj ? (uObj.email || uObj.username || userId) : userId;
 
-            const title = prompt(`Enter Push Notification Title for ${userStr}:`, "Trading Dashboard Alert");
+            const title = prompt(`Enter Push Notification Title for ${userStr}:`, "The Trading Journal Pro Alert");
             if (!title) return;
             const message = prompt(`Enter Notification Message for ${userStr}:`, "Your trading journal update is available.");
             if (!message) return;
@@ -2082,7 +2082,7 @@
             const modal = document.getElementById('broadcastPushModal');
             if (modal) {
                 modal.style.display = 'flex';
-                document.getElementById('broadcastTitle').value = "Trading Dashboard Pro Announcement";
+                document.getElementById('broadcastTitle').value = "The Trading Journal Pro Announcement";
                 document.getElementById('broadcastMessage').value = "";
                 document.getElementById('broadcastFullDesc').value = "";
                 document.getElementById('broadcastCategory').value = "ALERTS";
