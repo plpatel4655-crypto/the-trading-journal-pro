@@ -1936,7 +1936,7 @@
             const uObj = allUsersList.find(u => u.id === userId);
             const userStr = uObj ? (uObj.email || uObj.username || userId) : userId;
 
-            const title = prompt(`Enter Push Notification Title for ${userStr}:`, "Trading Dashboard Alert");
+            const title = prompt(`Enter Push Notification Title for ${userStr}:`, "The Trading Journal Pro Alert");
             if (!title) return;
             const message = prompt(`Enter Notification Message for ${userStr}:`, "Your trading journal update is available.");
             if (!message) return;
