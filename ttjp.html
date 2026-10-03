@@ -795,6 +795,13 @@
                         <div class="toggle-info"><h4>Global Ads Master Switch</h4><p>Enable (ON): Serve Ads | Disable (OFF): Ad-Free experience</p></div>
                         <label class="switch"><input type="checkbox" id="cfg_global_ads"><span class="slider"></span></label>
                     </div>
+                    <div class="toggle-row" style="background: rgba(234, 179, 8, 0.08); border-left: 3px solid #eab308; padding: 10px; border-radius: 6px;">
+                        <div class="toggle-info">
+                            <h4 style="color: #eab308;">Test Ads Mode (Google Official Test Ads)</h4>
+                            <p>Enable (ON): Serve Test Ads Instantly (Bypasses AdMob Review) | Disable (OFF): Serve Live Production Ads</p>
+                        </div>
+                        <label class="switch"><input type="checkbox" id="cfg_use_test_ads"><span class="slider"></span></label>
+                    </div>
                     <div class="toggle-row">
                         <div class="toggle-info"><h4>Master Pro Lock Control</h4><p>Enable (ON): Pro Paywall active | Disable (OFF): 100% FREE for all</p></div>
                         <label class="switch"><input type="checkbox" id="cfg_pro_paywall"><span class="slider"></span></label>
@@ -1466,6 +1473,7 @@
                     try {
                         const monObj = typeof map[_0xdec(0x6)] === 'string' ? JSON.parse(map[_0xdec(0x6)]) : map[_0xdec(0x6)];
                         if (monObj.global_ads !== undefined && document.getElementById('cfg_global_ads')) document.getElementById('cfg_global_ads').checked = !!monObj.global_ads;
+                        if (monObj.use_test_ads !== undefined && document.getElementById('cfg_use_test_ads')) document.getElementById('cfg_use_test_ads').checked = !!monObj.use_test_ads;
                         if (monObj.pro_paywall_enabled !== undefined && document.getElementById('cfg_pro_paywall')) document.getElementById('cfg_pro_paywall').checked = !!monObj.pro_paywall_enabled;
                         if (monObj.free_with_ads_enabled !== undefined && document.getElementById('cfg_free_with_ads')) document.getElementById('cfg_free_with_ads').checked = !!monObj.free_with_ads_enabled;
                         if (monObj.payment_enabled !== undefined && document.getElementById('cfg_is_payment_enabled')) document.getElementById('cfg_is_payment_enabled').checked = !!monObj.payment_enabled;
@@ -2736,6 +2744,7 @@
 
         function getMonetizationConfigPayload() {
             const isGlobalAds = document.getElementById('cfg_global_ads') ? document.getElementById('cfg_global_ads').checked : true;
+            const isUseTestAds = document.getElementById('cfg_use_test_ads') ? document.getElementById('cfg_use_test_ads').checked : true;
             const isProPaywall = document.getElementById('cfg_pro_paywall') ? document.getElementById('cfg_pro_paywall').checked : true;
             const isFreeWithAds = document.getElementById('cfg_free_with_ads') ? document.getElementById('cfg_free_with_ads').checked : false;
             const isPaymentEnabled = document.getElementById('cfg_is_payment_enabled') ? document.getElementById('cfg_is_payment_enabled').checked : true;
@@ -2762,6 +2771,7 @@
 
             const payload = {
                 global_ads: isGlobalAds,
+                use_test_ads: isUseTestAds,
                 banner_ads: isBannerAds,
                 native_ads: isNativeAds,
                 rewarded_ads: isRewardedAds,
