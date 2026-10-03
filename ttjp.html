@@ -977,7 +977,7 @@
                 </div>
                 <div class="form-group">
                     <label>Pro Access Status</label>
-                    <select id="editUserIsPro" class="form-control">
+                    <select id="editUserIsPro" class="form-control" onchange="onEditUserIsProChanged()">
                         <option value="true">⭐ PRO Access Enabled</option>
                         <option value="false">⚪ FREE User (Basic)</option>
                     </select>
@@ -987,12 +987,16 @@
             <div class="grid-2">
                 <div class="form-group">
                     <label>Subscription Plan</label>
-                    <select id="editUserSubPlan" class="form-control">
-                        <option value="monthly">Monthly Plan</option>
-                        <option value="quarterly">Quarterly Plan</option>
-                        <option value="yearly">Yearly Plan</option>
-                        <option value="lifetime">Lifetime Access</option>
-                        <option value="free">Free Tier</option>
+                    <select id="editUserSubPlan" class="form-control" onchange="onEditUserSubPlanChanged()">
+                        <option value="pro_monthly">⭐ Pro Monthly Plan (1 Month)</option>
+                        <option value="pro_quarterly">⭐ Pro Quarterly Plan (3 Months)</option>
+                        <option value="pro_yearly">⭐ Pro Yearly Plan (1 Year)</option>
+                        <option value="lifetime">⭐ Pro Lifetime Access (Permanent)</option>
+                        <option value="free">⚪ Free Tier (Basic)</option>
+                        <option value="monthly" style="display:none;">Monthly (Legacy)</option>
+                        <option value="quarterly" style="display:none;">Quarterly (Legacy)</option>
+                        <option value="yearly" style="display:none;">Yearly (Legacy)</option>
+                        <option value="lifetime_pro" style="display:none;">Lifetime Pro</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -1035,11 +1039,15 @@
                 <div class="form-group">
                     <label>Select Pro Plan Tier</label>
                     <select id="grantPlanSelect" class="form-control" onchange="autoCalculateExpiryDate()">
-                        <option value="monthly">Monthly Plan (30 Days)</option>
-                        <option value="quarterly">Quarterly Plan (90 Days)</option>
-                        <option value="yearly">Yearly Plan (365 Days)</option>
+                        <option value="pro_monthly">⭐ Pro Monthly Plan (30 Days)</option>
+                        <option value="pro_quarterly">⭐ Pro Quarterly Plan (90 Days)</option>
+                        <option value="pro_yearly">⭐ Pro Yearly Plan (365 Days)</option>
                         <option value="lifetime" selected>⭐ Lifetime Unlimited Access</option>
                         <option value="custom">Custom Trial / Custom Duration</option>
+                        <option value="monthly" style="display:none;">Monthly Plan</option>
+                        <option value="quarterly" style="display:none;">Quarterly Plan</option>
+                        <option value="yearly" style="display:none;">Yearly Plan</option>
+                        <option value="lifetime_pro" style="display:none;">Lifetime Pro</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -1094,7 +1102,7 @@
 
             <div class="form-group">
                 <label>Notification Title <span style="color:var(--danger)">*</span></label>
-                <input type="text" id="broadcastTitle" class="form-control" placeholder="e.g. Major Feature Update & Market Alert" value="The Trading Journal Pro Announcement">
+                <input type="text" id="broadcastTitle" class="form-control" placeholder="e.g. Major Feature Update & Market Alert" value="Trading Dashboard Pro Announcement">
             </div>
 
             <div class="form-group">
@@ -1797,7 +1805,10 @@
                             <p style="font-size:10px; color:var(--text-muted); margin-top:2px;">User: ${nameStr}</p>
                         </td>
                         <td>${dateStr}</td>
-                        <td><span class="status-chip ${isPro ? 'status-resolved' : 'status-open'}">${isPro ? '⭐ PRO' : '⚪ FREE'}</span></td>
+                        <td>
+                            <span class="status-chip ${isPro ? 'status-resolved' : 'status-open'}">${isPro ? '⭐ PRO' : '⚪ FREE'}</span>
+                            ${isPro && u.subscription_plan ? `<div style="font-size:9.5px; font-weight:700; color:var(--primary); margin-top:3px;">${formatPlanDisplay(u.subscription_plan)}</div>` : ''}
+                        </td>
                         <td><span class="status-chip ${isDeviceBound ? 'status-resolved' : 'status-closed'}">${isDeviceBound ? '🟢 Bound' : '🔴 Unbound'}</span></td>
                         <td>
                             <div style="display:flex; gap:6px; justify-content:center; flex-wrap:wrap;">
@@ -1816,6 +1827,30 @@
         // Live User Directory Profile Editor Functions
         let activeEditingUserObj = null;
 
+        function getNormalizedPlanKey(rawPlan, isPro) {
+            if (!rawPlan || String(rawPlan).trim() === '') {
+                return isPro ? 'lifetime' : 'free';
+            }
+            const clean = String(rawPlan).trim().toLowerCase();
+            if (clean === 'pro_monthly' || clean === 'monthly' || clean.includes('month') || clean === '1m') return 'pro_monthly';
+            if (clean === 'pro_quarterly' || clean === 'quarterly' || clean.includes('quarter') || clean === '3m') return 'pro_quarterly';
+            if (clean === 'pro_yearly' || clean === 'yearly' || clean.includes('year') || clean === 'annual' || clean === '1y') return 'pro_yearly';
+            if (clean === 'lifetime' || clean === 'lifetime_pro' || clean.includes('life')) return 'lifetime';
+            if (clean === 'free' || clean === 'basic') return 'free';
+            return clean;
+        }
+
+        function formatPlanDisplay(plan) {
+            if (!plan) return '';
+            const clean = String(plan).trim().toLowerCase();
+            if (clean === 'pro_monthly' || clean === 'monthly') return 'Monthly Pro';
+            if (clean === 'pro_quarterly' || clean === 'quarterly') return 'Quarterly Pro';
+            if (clean === 'pro_yearly' || clean === 'yearly') return 'Yearly Pro';
+            if (clean === 'lifetime' || clean === 'lifetime_pro') return 'Lifetime Pro';
+            if (clean === 'free') return 'Free';
+            return plan.toUpperCase();
+        }
+
         function openEditUserModal(userId) {
             activeEditingUserObj = allUsersList.find(u => u.id === userId);
             if (!activeEditingUserObj) {
@@ -1827,12 +1862,81 @@
             document.getElementById('editUserUsername').value = activeEditingUserObj.username || '';
             document.getElementById('editUserEmail').value = activeEditingUserObj.email || '';
             document.getElementById('editUserMobile').value = activeEditingUserObj.mobile_number || '';
-            document.getElementById('editUserIsPro').value = activeEditingUserObj.is_pro ? 'true' : 'false';
-            document.getElementById('editUserSubPlan').value = activeEditingUserObj.subscription_plan || (activeEditingUserObj.is_pro ? 'lifetime' : 'free');
+
+            const isPro = !!activeEditingUserObj.is_pro;
+            document.getElementById('editUserIsPro').value = isPro ? 'true' : 'false';
+
+            const rawPlan = activeEditingUserObj.subscription_plan;
+            const normalizedPlan = getNormalizedPlanKey(rawPlan, isPro);
+            const planSelect = document.getElementById('editUserSubPlan');
+
+            let matched = false;
+            for (let i = 0; i < planSelect.options.length; i++) {
+                if (planSelect.options[i].value.toLowerCase() === normalizedPlan.toLowerCase()) {
+                    planSelect.selectedIndex = i;
+                    matched = true;
+                    break;
+                }
+            }
+            if (!matched && normalizedPlan) {
+                const opt = document.createElement('option');
+                opt.value = normalizedPlan;
+                opt.textContent = `${normalizedPlan} (Custom)`;
+                planSelect.appendChild(opt);
+                planSelect.value = normalizedPlan;
+            }
+
             document.getElementById('editUserSubExpiry').value = formatToDDMMYYYY(activeEditingUserObj.subscription_expiry_date) || '';
             document.getElementById('editUserActiveDevice').value = activeEditingUserObj.active_device_id || '';
 
             document.getElementById('editUserProfileModal').style.display = 'flex';
+        }
+
+        function onEditUserSubPlanChanged() {
+            const plan = document.getElementById('editUserSubPlan').value;
+            const isProSelect = document.getElementById('editUserIsPro');
+            const expiryInput = document.getElementById('editUserSubExpiry');
+
+            if (plan === 'free') {
+                isProSelect.value = 'false';
+                expiryInput.value = '';
+            } else {
+                isProSelect.value = 'true';
+                const now = new Date();
+                if (plan === 'lifetime' || plan === 'lifetime_pro') {
+                    expiryInput.value = '31-12-2099';
+                } else if (plan === 'pro_monthly' || plan === 'monthly') {
+                    const d = new Date(now);
+                    d.setDate(d.getDate() + 30);
+                    expiryInput.value = formatToDDMMYYYY(d);
+                } else if (plan === 'pro_quarterly' || plan === 'quarterly') {
+                    const d = new Date(now);
+                    d.setDate(d.getDate() + 90);
+                    expiryInput.value = formatToDDMMYYYY(d);
+                } else if (plan === 'pro_yearly' || plan === 'yearly') {
+                    const d = new Date(now);
+                    d.setDate(d.getDate() + 365);
+                    expiryInput.value = formatToDDMMYYYY(d);
+                }
+            }
+        }
+
+        function onEditUserIsProChanged() {
+            const isPro = document.getElementById('editUserIsPro').value === 'true';
+            const planSelect = document.getElementById('editUserSubPlan');
+            const expiryInput = document.getElementById('editUserSubExpiry');
+
+            if (isPro) {
+                if (planSelect.value === 'free' || !planSelect.value) {
+                    planSelect.value = 'pro_monthly';
+                    const d = new Date();
+                    d.setDate(d.getDate() + 30);
+                    expiryInput.value = formatToDDMMYYYY(d);
+                }
+            } else {
+                planSelect.value = 'free';
+                expiryInput.value = '';
+            }
         }
 
         function closeEditUserModal() {
@@ -1853,9 +1957,13 @@
             const email = document.getElementById('editUserEmail').value.trim();
             const mobile = document.getElementById('editUserMobile').value.trim();
             const isPro = document.getElementById('editUserIsPro').value === 'true';
-            const subPlan = document.getElementById('editUserSubPlan').value;
+            let subPlan = document.getElementById('editUserSubPlan').value;
             const subExpiry = document.getElementById('editUserSubExpiry').value.trim();
             const activeDevice = document.getElementById('editUserActiveDevice').value.trim();
+
+            if (!isPro) {
+                subPlan = 'free';
+            }
 
             const updatePayload = {
                 username: username,
@@ -1863,7 +1971,7 @@
                 mobile_number: mobile,
                 is_pro: isPro,
                 subscription_plan: subPlan,
-                subscription_expiry_date: subExpiry,
+                subscription_expiry_date: isPro ? (subExpiry || (subPlan === 'lifetime' ? '31-12-2099' : '')) : '',
                 active_device_id: activeDevice,
                 updated_at: new Date().toISOString()
             };
@@ -1896,7 +2004,8 @@
 
             const todayStr = formatToDDMMYYYY(new Date());
             document.getElementById('grantStartDate').value = formatToDDMMYYYY(activeGrantUserObj.subscription_start_date) || todayStr;
-            document.getElementById('grantPlanSelect').value = activeGrantUserObj.subscription_plan || (activeGrantUserObj.is_pro ? 'lifetime' : 'monthly');
+            const grantPlan = getNormalizedPlanKey(activeGrantUserObj.subscription_plan, activeGrantUserObj.is_pro);
+            document.getElementById('grantPlanSelect').value = (grantPlan && grantPlan !== 'free') ? grantPlan : 'pro_monthly';
             document.getElementById('grantTxnNote').value = "ADMIN_GRANT_" + Date.now().toString().substring(7);
 
             autoCalculateExpiryDate();
@@ -1913,17 +2022,17 @@
             const startDateVal = document.getElementById('grantStartDate').value.trim() || formatToDDMMYYYY(new Date());
             const startDate = parseDateString(startDateVal);
 
-            if (plan === 'lifetime') {
+            if (plan === 'lifetime' || plan === 'lifetime_pro') {
                 document.getElementById('grantExpiryDate').value = '31-12-2099';
-            } else if (plan === 'monthly') {
+            } else if (plan === 'monthly' || plan === 'pro_monthly') {
                 const exp = new Date(startDate);
                 exp.setDate(exp.getDate() + 30);
                 document.getElementById('grantExpiryDate').value = formatToDDMMYYYY(exp);
-            } else if (plan === 'quarterly') {
+            } else if (plan === 'quarterly' || plan === 'pro_quarterly') {
                 const exp = new Date(startDate);
                 exp.setDate(exp.getDate() + 90);
                 document.getElementById('grantExpiryDate').value = formatToDDMMYYYY(exp);
-            } else if (plan === 'yearly') {
+            } else if (plan === 'yearly' || plan === 'pro_yearly') {
                 const exp = new Date(startDate);
                 exp.setDate(exp.getDate() + 365);
                 document.getElementById('grantExpiryDate').value = formatToDDMMYYYY(exp);
@@ -2046,7 +2155,7 @@
             const uObj = allUsersList.find(u => u.id === userId);
             const userStr = uObj ? (uObj.email || uObj.username || userId) : userId;
 
-            const title = prompt(`Enter Push Notification Title for ${userStr}:`, "The Trading Journal Pro Alert");
+            const title = prompt(`Enter Push Notification Title for ${userStr}:`, "Trading Dashboard Alert");
             if (!title) return;
             const message = prompt(`Enter Notification Message for ${userStr}:`, "Your trading journal update is available.");
             if (!message) return;
@@ -2082,7 +2191,7 @@
             const modal = document.getElementById('broadcastPushModal');
             if (modal) {
                 modal.style.display = 'flex';
-                document.getElementById('broadcastTitle').value = "The Trading Journal Pro Announcement";
+                document.getElementById('broadcastTitle').value = "Trading Dashboard Pro Announcement";
                 document.getElementById('broadcastMessage').value = "";
                 document.getElementById('broadcastFullDesc').value = "";
                 document.getElementById('broadcastCategory').value = "ALERTS";
@@ -3673,6 +3782,10 @@ window['confirmRevokeProAccess'] = confirmRevokeProAccess;
 window['openEditUserModal'] = openEditUserModal;
 window['closeEditUserModal'] = closeEditUserModal;
 window['saveUserProfileEdits'] = saveUserProfileEdits;
+window['onEditUserSubPlanChanged'] = onEditUserSubPlanChanged;
+window['onEditUserIsProChanged'] = onEditUserIsProChanged;
+window['getNormalizedPlanKey'] = getNormalizedPlanKey;
+window['formatPlanDisplay'] = formatPlanDisplay;
 window['showDashboard'] = showDashboard;
 window['hideDashboard'] = hideDashboard;
 window['toggleEducationalGuidesActive'] = toggleEducationalGuidesActive;
