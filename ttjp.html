@@ -131,6 +131,11 @@
         table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
         th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
         th { background-color: var(--surface-bg); color: var(--text-muted); font-weight: 700; }
+        th.sortable-th { cursor: pointer; user-select: none; transition: background 0.2s ease, color 0.2s ease; white-space: nowrap; }
+        th.sortable-th:hover { background-color: rgba(56, 189, 248, 0.12); color: var(--primary); }
+        .sort-icon { display: inline-block; margin-left: 4px; font-size: 10px; opacity: 0.45; transition: opacity 0.2s ease; }
+        th.sortable-th:hover .sort-icon { opacity: 0.9; }
+        .sort-icon.active { opacity: 1; color: var(--primary); font-weight: 900; }
 
         #toast { position: fixed; bottom: 24px; right: 24px; background-color: var(--primary); color: white; padding: 12px 22px; border-radius: 10px; font-weight: 700; font-size: 13px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: none; z-index: 10000; border: 1px solid rgba(255,255,255,0.2); }
         .chart-container { position: relative; height: 260px; width: 100%; }
@@ -432,12 +437,12 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th>User ID</th>
-                                    <th>Email & Username</th>
-                                    <th>Joined Date</th>
-                                    <th>Pro Status</th>
-                                    <th>Session Status</th>
-                                    <th style="text-align: center;">Full Admin Actions & Controls</th>
+                                    <th class="sortable-th" onclick="sortUsersTable('id')" title="Click to sort by User ID (Ascending / Descending)">User ID <span id="sort-icon-id" class="sort-icon">↕</span></th>
+                                    <th class="sortable-th" onclick="sortUsersTable('email')" title="Click to sort by Email & Username (Ascending / Descending)">Email & Username <span id="sort-icon-email" class="sort-icon">↕</span></th>
+                                    <th class="sortable-th" onclick="sortUsersTable('date')" title="Click to sort by Joined Date (Ascending / Descending)">Joined Date <span id="sort-icon-date" class="sort-icon">▼</span></th>
+                                    <th class="sortable-th" onclick="sortUsersTable('pro')" title="Click to sort by Pro Status (Ascending / Descending)">Pro Status <span id="sort-icon-pro" class="sort-icon">↕</span></th>
+                                    <th class="sortable-th" onclick="sortUsersTable('session')" title="Click to sort by Session Status (Ascending / Descending)">Session Status <span id="sort-icon-session" class="sort-icon">↕</span></th>
+                                    <th style="text-align: center; user-select: none;">Full Admin Actions & Controls</th>
                                 </tr>
                             </thead>
                             <tbody id="usersTableBody">
@@ -1725,6 +1730,36 @@
             } catch (err) { showToast('Session Revoke: ' + err.message, true); }
         }
 
+        let userSortColumn = 'date';
+        let userSortDirection = 'desc';
+
+        function updateSortHeaderIcons() {
+            const cols = ['id', 'email', 'date', 'pro', 'session'];
+            cols.forEach(col => {
+                const iconElem = document.getElementById(`sort-icon-${col}`);
+                if (!iconElem) return;
+                if (userSortColumn === col) {
+                    iconElem.innerText = userSortDirection === 'asc' ? '▲' : '▼';
+                    iconElem.className = 'sort-icon active';
+                } else {
+                    iconElem.innerText = '↕';
+                    iconElem.className = 'sort-icon';
+                }
+            });
+        }
+
+        function sortUsersTable(col) {
+            if (userSortColumn === col) {
+                userSortDirection = userSortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                userSortColumn = col;
+                // For date, pro, or session, default to desc first (newest, highest tier, bound first); for text default to asc (A-Z)
+                userSortDirection = (col === 'date' || col === 'pro' || col === 'session') ? 'desc' : 'asc';
+            }
+            updateSortHeaderIcons();
+            filterUsersTable(activeUserFilterTab);
+        }
+
         async function loadUsersTable() {
             if (!supabaseClient) return;
             const tbody = document.getElementById('usersTableBody');
@@ -1734,13 +1769,6 @@
                 const { data: users, error } = await supabaseClient.from(_0xdec(0xa)).select('*');
                 if (error) throw error;
                 allUsersList = users || [];
-                
-                allUsersList.sort((a, b) => {
-                    const dateA = a.updated_at || a.created_at || a.createdAt || '';
-                    const dateB = b.updated_at || b.created_at || b.createdAt || '';
-                    if (dateA && dateB) return dateB.localeCompare(dateA);
-                    return 0;
-                });
                 
                 const proCount = allUsersList.filter(u => u.is_pro).length;
                 const freeCount = allUsersList.length - proCount;
@@ -1752,6 +1780,7 @@
                 if (document.getElementById('metricUsers')) document.getElementById('metricUsers').innerText = allUsersList.length;
                 if (document.getElementById('metricProUsers')) document.getElementById('metricProUsers').innerText = proCount;
 
+                updateSortHeaderIcons();
                 filterUsersTable(activeUserFilterTab);
             } catch (err) {
                 tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--danger);">Failed to load users: ${err.message}</td></tr>`;
@@ -1760,9 +1789,9 @@
 
         function filterUsersTable(type) {
             activeUserFilterTab = type;
-            let list = allUsersList;
-            if (type === 'PRO') list = allUsersList.filter(u => u.is_pro);
-            else if (type === 'FREE') list = allUsersList.filter(u => !u.is_pro);
+            let list = allUsersList.slice();
+            if (type === 'PRO') list = list.filter(u => u.is_pro);
+            else if (type === 'FREE') list = list.filter(u => !u.is_pro);
 
             const searchElem = document.getElementById('usersTableSearch');
             const searchVal = searchElem ? searchElem.value.trim().toLowerCase() : '';
@@ -1773,6 +1802,45 @@
                     (u.id || '').toLowerCase().includes(searchVal)
                 );
             }
+
+            // Apply interactive sorting
+            list.sort((a, b) => {
+                let res = 0;
+                if (userSortColumn === 'id') {
+                    const idA = (a.id || '').toLowerCase();
+                    const idB = (b.id || '').toLowerCase();
+                    res = idA.localeCompare(idB);
+                } else if (userSortColumn === 'email') {
+                    const nameA = (a.email || a.username || '').toLowerCase();
+                    const nameB = (b.email || b.username || '').toLowerCase();
+                    res = nameA.localeCompare(nameB);
+                } else if (userSortColumn === 'date') {
+                    const getTime = (u) => {
+                        const d = u.created_at || u.updated_at || u.createdAt;
+                        if (!d) return 0;
+                        const t = new Date(d).getTime();
+                        return isNaN(t) ? 0 : t;
+                    };
+                    res = getTime(a) - getTime(b);
+                } else if (userSortColumn === 'pro') {
+                    const getProRank = (u) => {
+                        if (!u.is_pro) return 0;
+                        const p = (u.subscription_plan || '').toLowerCase();
+                        if (p.includes('life')) return 5;
+                        if (p.includes('year') || p.includes('annual')) return 4;
+                        if (p.includes('quarter') || p.includes('3m')) return 3;
+                        if (p.includes('month') || p.includes('1m')) return 2;
+                        return 1;
+                    };
+                    res = getProRank(a) - getProRank(b);
+                } else if (userSortColumn === 'session') {
+                    const isBoundA = (u.active_device_id && u.active_device_id.trim().length > 0) ? 1 : 0;
+                    const isBoundB = (u.active_device_id && u.active_device_id.trim().length > 0) ? 1 : 0;
+                    res = isBoundA - isBoundB;
+                }
+                return userSortDirection === 'desc' ? -res : res;
+            });
+
             renderUsersTable(list);
         }
 
@@ -3786,6 +3854,8 @@ window['onEditUserSubPlanChanged'] = onEditUserSubPlanChanged;
 window['onEditUserIsProChanged'] = onEditUserIsProChanged;
 window['getNormalizedPlanKey'] = getNormalizedPlanKey;
 window['formatPlanDisplay'] = formatPlanDisplay;
+window['sortUsersTable'] = sortUsersTable;
+window['updateSortHeaderIcons'] = updateSortHeaderIcons;
 window['showDashboard'] = showDashboard;
 window['hideDashboard'] = hideDashboard;
 window['toggleEducationalGuidesActive'] = toggleEducationalGuidesActive;
