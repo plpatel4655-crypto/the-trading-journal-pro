@@ -955,6 +955,50 @@
       <!-- TAB 2: USER PURCHASES & DEVICES                                       -->
       <!-- ===================================================================== -->
       <section id="tab-purchases" class="space-y-4 hidden" style="display: none;" hidden>
+        <!-- Quick Grant Device Pro Card -->
+        <div class="glass-card p-4 sm:p-5 rounded-2xl border border-indigo-500/25 bg-gradient-to-r from-indigo-950/40 via-slate-900/60 to-slate-900/40 shadow-xl">
+          <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-sm shadow-inner shadow-indigo-500/20">
+                  <svg class="wb-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                  </svg>
+                </span>
+                <div>
+                  <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                    <span>Instant Pro Unlock for Testing Devices</span>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/30">Free Live Grant</span>
+                  </h3>
+                  <p class="text-xs text-slate-400 mt-0.5">
+                    Kisi bhi device ka <b class="text-indigo-300">Android Device ID</b> yahan daal kar Pro activate karein. Mobile app me turant sabhi 13 Pro features aur recording free unlock ho jayenge!
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <form onsubmit="handleQuickGrant(event)" class="w-full xl:w-auto flex flex-col sm:flex-row items-center gap-2">
+              <input type="text" id="quick-device-id" required placeholder="Paste Android Device ID..."
+                class="glass-input px-3.5 py-2.5 rounded-xl text-xs font-mono text-white placeholder-slate-500 w-full sm:w-60 focus:border-indigo-400">
+              <input type="text" id="quick-device-name" placeholder="Device / Tester Name (Optional)"
+                class="glass-input px-3.5 py-2.5 rounded-xl text-xs text-white placeholder-slate-500 w-full sm:w-48 focus:border-indigo-400">
+              <select id="quick-device-duration"
+                class="glass-input px-3 py-2.5 rounded-xl text-xs text-slate-200 bg-slate-900 border border-white/10 w-full sm:w-36 focus:border-indigo-400">
+                <option value="1">1 Year Pro (₹49)</option>
+                <option value="2">2 Years Pro</option>
+                <option value="10">Lifetime (10 Years)</option>
+              </select>
+              <button type="submit"
+                class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-brand-600 hover:from-indigo-500 hover:to-brand-500 text-white text-xs font-bold shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-1.5 transition whitespace-nowrap">
+                <svg class="wb-svg-icon text-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/>
+                </svg>
+                <span>Unlock Pro</span>
+              </button>
+            </form>
+          </div>
+        </div>
+
         <!-- Purchases Header & Search -->
         <div class="glass-card p-3 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-3">
           <div class="relative w-full md:w-80">
@@ -967,13 +1011,19 @@
               class="glass-input w-full pl-9 pr-4 py-2 rounded-xl text-xs text-white placeholder-slate-500">
           </div>
 
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 w-full md:w-auto justify-end">
+            <select id="purchase-status-filter" onchange="filterPurchases()"
+              class="glass-input px-3 py-2 rounded-xl text-xs text-slate-300 bg-slate-900 border border-white/10">
+              <option value="all">All Devices</option>
+              <option value="pro">Pro Active Only</option>
+              <option value="revoked">Revoked Only</option>
+            </select>
             <button onclick="openManualGrantModal()"
-              class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-500/20 flex items-center gap-1.5 transition">
+              class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-500/20 flex items-center gap-1.5 transition whitespace-nowrap">
               <svg class="wb-svg-icon text-[11px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-2 2m-1.5 1.5L14 9l-2-2-4 4-2-2-4 4"/>
               </svg>
-              <span>Grant Device Pro Manually</span>
+              <span>Detailed Grant</span>
             </button>
           </div>
         </div>
@@ -1137,15 +1187,26 @@
           <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">User Mobile Device ID (Android ID)</label>
           <input type="text" id="grant-device-id" required placeholder="e.g. 4a8b79c02d1e5678"
             class="glass-input w-full px-3.5 py-2.5 rounded-xl text-xs font-mono text-white placeholder-slate-500">
+          <p class="text-[11px] text-slate-500 mt-1">Found in WhiteBoard App &rarr; Settings &rarr; About &rarr; Device ID.</p>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Device Model / Tester Label</label>
+          <input type="text" id="grant-model" placeholder="e.g. Samsung Galaxy S23 (Tester Phone)"
+            class="glass-input w-full px-3.5 py-2.5 rounded-xl text-xs text-white placeholder-slate-500">
         </div>
 
         <div>
           <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Plan Duration</label>
           <select id="grant-duration" class="glass-input w-full px-3 py-2.5 rounded-xl text-xs text-slate-200 bg-slate-900 border border-white/10">
-            <option value="1">1 Year Pro Access (Default ₹49)</option>
+            <option value="1">1 Year Pro Access (₹49 Plan)</option>
             <option value="2">2 Years Pro Access</option>
-            <option value="10">Lifetime (10 Years)</option>
+            <option value="10">Lifetime Access (10 Years)</option>
           </select>
+        </div>
+
+        <div class="p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-[11px] text-indigo-300">
+          💡 <b>Instant Live Pro Unlock:</b> Once granted here, opening WhiteBoard app on that device (or tapping Restore Purchases in Settings) will instantly activate Pro for free!
         </div>
 
         <div class="flex items-center justify-end gap-2 pt-2">
@@ -1496,10 +1557,13 @@
 
     function updatePurchaseStats() {
       const total = purchasesList.length;
-      const revenue = total * 49;
+      const activePro = purchasesList.filter(p => {
+        const isExpired = p.expires_at && new Date(p.expires_at) < new Date();
+        return p.is_pro && !isExpired;
+      }).length;
 
       document.getElementById("stat-total-devices").innerText = total;
-      document.getElementById("stat-total-revenue").innerText = `(₹${revenue})`;
+      document.getElementById("stat-total-revenue").innerText = `(${activePro} Active Pro)`;
       document.getElementById("purchases-badge").innerText = total;
     }
 
@@ -1614,19 +1678,22 @@
       }
 
       tbody.innerHTML = items.map(p => {
-        const isPro = p.is_pro;
+        const isExpired = p.expires_at && new Date(p.expires_at) < new Date();
+        const effectivePro = p.is_pro && !isExpired;
         const purchaseDate = p.purchased_at ? new Date(p.purchased_at).toLocaleDateString() : 'N/A';
-        const expiryDate = p.expires_at ? new Date(p.expires_at).toLocaleDateString() : 'N/A';
+        const expiryDisplay = p.expires_at
+          ? `<span class="${isExpired ? 'text-rose-400 font-semibold' : 'text-slate-300'}">${new Date(p.expires_at).toLocaleDateString()}</span>${isExpired ? '<span class="px-1.5 py-0.5 rounded text-[9px] bg-rose-500/20 text-rose-300 font-bold ml-1.5">EXPIRED</span>' : ''}`
+          : '<span class="text-slate-500">N/A</span>';
 
         return `
           <tr class="hover:bg-slate-800/40 transition">
             <!-- Device ID -->
             <td class="py-3 px-4">
               <div class="flex items-center gap-2">
-                <code class="px-2 py-0.5 rounded bg-slate-900 border border-white/10 font-mono text-[11px] text-indigo-300 font-semibold cursor-pointer" title="Click to copy" onclick="copyToClipboard('${escapeHtml(p.device_id)}')">
+                <code class="px-2 py-0.5 rounded bg-slate-900 border border-white/10 font-mono text-[11px] text-indigo-300 font-semibold cursor-pointer hover:border-indigo-400 transition" title="Click to copy" onclick="copyToClipboard('${escapeHtml(p.device_id)}')">
                   ${escapeHtml(p.device_id)}
                 </code>
-                <button onclick="copyToClipboard('${escapeHtml(p.device_id)}')" class="text-slate-500 hover:text-slate-300 text-xs" title="Copy ID">
+                <button onclick="copyToClipboard('${escapeHtml(p.device_id)}')" class="text-slate-500 hover:text-indigo-400 text-xs transition" title="Copy ID">
                   ${wbIcon('copy', 'text-xs')}
                 </button>
               </div>
@@ -1635,7 +1702,7 @@
             <!-- Device Model & OS -->
             <td class="py-3 px-4">
               <p class="font-semibold text-white">${escapeHtml(p.device_model || 'Android Device')}</p>
-              <p class="text-[11px] text-slate-400">${escapeHtml(p.android_version || 'Android')}</p>
+              <p class="text-[11px] text-slate-400 font-mono">${escapeHtml(p.android_version || 'Android')}</p>
             </td>
 
             <!-- Plan & Price -->
@@ -1650,27 +1717,33 @@
             </td>
 
             <!-- Expiry -->
-            <td class="py-3 px-4 text-slate-400 text-[11px]">
-              ${expiryDate}
+            <td class="py-3 px-4 text-[11px]">
+              ${expiryDisplay}
             </td>
 
             <!-- Pro Toggle -->
             <td class="py-3 px-4 text-center">
               <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" onchange="toggleDevicePro('${escapeHtml(p.device_id)}', this.checked)" ${isPro ? 'checked' : ''} class="sr-only peer">
+                <input type="checkbox" onchange="toggleDevicePro('${escapeHtml(p.device_id)}', this.checked)" ${effectivePro ? 'checked' : ''} class="sr-only peer">
                 <div class="w-10 h-5 bg-slate-700 rounded-full peer peer-checked:bg-emerald-500 transition-all after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
               </label>
-              <div class="text-[10px] mt-0.5 ${isPro ? 'text-emerald-400 font-semibold' : 'text-slate-500'}">
-                ${isPro ? 'Pro Active' : 'Revoked'}
+              <div class="text-[10px] mt-0.5 ${effectivePro ? 'text-emerald-400 font-semibold' : 'text-slate-500'}">
+                ${effectivePro ? 'Pro Active' : (isExpired ? 'Expired' : 'Revoked')}
               </div>
             </td>
 
-            <!-- Delete -->
+            <!-- Actions: Extend & Delete -->
             <td class="py-3 px-4 text-right">
-              <button onclick="deleteDeviceRecord('${escapeHtml(p.device_id)}')" title="Delete device"
-                class="w-7 h-7 rounded-lg glass-card hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition">
-                ${wbIcon('trash', 'text-xs')}
-              </button>
+              <div class="flex items-center justify-end gap-1.5">
+                <button onclick="extendDevicePro('${escapeHtml(p.device_id)}')" title="Extend Pro by +1 Year"
+                  class="px-2 py-1 rounded-lg glass-card hover:bg-emerald-500/20 text-slate-300 hover:text-emerald-400 text-[11px] font-semibold transition flex items-center gap-1">
+                  <span>+1 Year</span>
+                </button>
+                <button onclick="deleteDeviceRecord('${escapeHtml(p.device_id)}')" title="Delete device"
+                  class="w-7 h-7 rounded-lg glass-card hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition flex items-center justify-center">
+                  ${wbIcon('trash', 'text-xs')}
+                </button>
+              </div>
             </td>
           </tr>
         `;
@@ -1883,15 +1956,56 @@
     // Toggle Device Pro Status
     async function toggleDevicePro(deviceId, isPro) {
       try {
-        await apiRequest(`/user_purchases?device_id=eq.${encodeURIComponent(deviceId)}`, "PATCH", {
+        const item = purchasesList.find(p => p.device_id === deviceId);
+        const patchData = {
           is_pro: isPro,
           updated_at: new Date().toISOString()
-        }, { "Prefer": "return=minimal" });
+        };
+        // If enabling Pro and it was expired or had no expiry, give it 1 year from now
+        if (isPro && item) {
+          const exp = item.expires_at ? new Date(item.expires_at) : null;
+          if (!exp || exp < new Date()) {
+            const newExp = new Date(Date.now() + (365 * 24 * 60 * 60 * 1000));
+            patchData.expires_at = newExp.toISOString();
+            item.expires_at = patchData.expires_at;
+          }
+        }
 
-        showToast(`Device ${deviceId} Pro status set to ${isPro ? 'ACTIVE' : 'REVOKED'}`, "success");
+        await apiRequest(`/user_purchases?device_id=eq.${encodeURIComponent(deviceId)}`, "PATCH", patchData, { "Prefer": "return=minimal" });
+
+        if (item) item.is_pro = isPro;
+        showToast(`Device ${deviceId} Pro status set to ${isPro ? 'ACTIVE' : 'REVOKED'}!`, isPro ? "success" : "info");
+        renderPurchasesTable(purchasesList);
+        updatePurchaseStats();
       } catch (err) {
         showToast("Error updating device: " + err.message, "error");
         fetchPurchases();
+      }
+    }
+
+    // Extend Device Pro License by +1 Year
+    async function extendDevicePro(deviceId) {
+      const item = purchasesList.find(p => p.device_id === deviceId);
+      if (!item) return;
+
+      const currentExpiry = item.expires_at ? new Date(item.expires_at) : new Date();
+      const baseTime = currentExpiry > new Date() ? currentExpiry.getTime() : Date.now();
+      const newExpiry = new Date(baseTime + (365 * 24 * 60 * 60 * 1000));
+
+      try {
+        await apiRequest(`/user_purchases?device_id=eq.${encodeURIComponent(deviceId)}`, "PATCH", {
+          is_pro: true,
+          expires_at: newExpiry.toISOString(),
+          updated_at: new Date().toISOString()
+        }, { "Prefer": "return=minimal" });
+
+        item.is_pro = true;
+        item.expires_at = newExpiry.toISOString();
+        showToast(`Extended Pro license for device ${deviceId} by +1 Year!`, "success");
+        renderPurchasesTable(purchasesList);
+        updatePurchaseStats();
+      } catch (err) {
+        showToast("Error extending license: " + err.message, "error");
       }
     }
 
@@ -1933,12 +2047,24 @@
 
     // Filter Purchases
     function filterPurchases() {
-      const query = document.getElementById("purchase-search").value.toLowerCase().trim();
-      const filtered = purchasesList.filter(p =>
-        p.device_id.toLowerCase().includes(query) ||
-        (p.device_model && p.device_model.toLowerCase().includes(query)) ||
-        (p.android_version && p.android_version.toLowerCase().includes(query))
-      );
+      const query = (document.getElementById("purchase-search")?.value || "").toLowerCase().trim();
+      const statusFilter = document.getElementById("purchase-status-filter")?.value || "all";
+
+      const filtered = purchasesList.filter(p => {
+        const matchesQuery = !query ||
+          p.device_id.toLowerCase().includes(query) ||
+          (p.device_model && p.device_model.toLowerCase().includes(query)) ||
+          (p.android_version && p.android_version.toLowerCase().includes(query)) ||
+          (p.plan_name && p.plan_name.toLowerCase().includes(query));
+
+        const isExpired = p.expires_at && new Date(p.expires_at) < new Date();
+        const effectivePro = p.is_pro && !isExpired;
+
+        if (statusFilter === "pro") return matchesQuery && effectivePro;
+        if (statusFilter === "revoked") return matchesQuery && !effectivePro;
+        return matchesQuery;
+      });
+
       renderPurchasesTable(filtered);
     }
 
@@ -2085,6 +2211,7 @@
     async function handleManualGrant(e) {
       e.preventDefault();
       const deviceId = document.getElementById("grant-device-id").value.trim();
+      const model = document.getElementById("grant-model")?.value.trim() || "Admin Granted (Tester)";
       const years = parseInt(document.getElementById("grant-duration").value, 10);
       if (!deviceId) return;
 
@@ -2092,13 +2219,15 @@
       const expiry = new Date(now.getTime() + (years * 365 * 24 * 60 * 60 * 1000));
 
       try {
-        await apiRequest("/user_purchases", "POST", {
+        await apiRequest("/user_purchases?on_conflict=device_id", "POST", {
           device_id: deviceId,
           plan_name: `${years} Year Pro Plan - ₹${years * 49}`,
           price_paid: `₹${years * 49}`,
           is_pro: true,
-          device_model: "Admin Granted",
-          android_version: "Verified",
+          device_model: model,
+          android_version: "Verified Pro",
+          order_id: "ADMIN-WB-" + Date.now(),
+          purchase_token: "admin_granted_" + Math.random().toString(36).substring(2, 10),
           purchased_at: now.toISOString(),
           expires_at: expiry.toISOString(),
           updated_at: now.toISOString()
@@ -2107,8 +2236,48 @@
         });
 
         closeManualGrantModal();
-        showToast(`Pro access granted to device ${deviceId}!`, "success");
-        fetchPurchases();
+        showToast(`Pro access granted to device ${deviceId}! 🎉`, "success");
+        await fetchPurchases();
+      } catch (err) {
+        showToast("Error granting Pro: " + err.message, "error");
+      }
+    }
+
+    // Quick Grant Pro Handler
+    async function handleQuickGrant(e) {
+      e.preventDefault();
+      const input = document.getElementById("quick-device-id");
+      const nameInput = document.getElementById("quick-device-name");
+      const durationSelect = document.getElementById("quick-device-duration");
+      const deviceId = input.value.trim();
+      const model = (nameInput?.value || "").trim() || "Admin Granted (Quick)";
+      const years = parseInt(durationSelect?.value || "1", 10);
+      if (!deviceId) return;
+
+      const now = new Date();
+      const expiry = new Date(now.getTime() + (years * 365 * 24 * 60 * 60 * 1000));
+
+      try {
+        await apiRequest("/user_purchases?on_conflict=device_id", "POST", {
+          device_id: deviceId,
+          plan_name: `${years} Year Pro Plan - ₹${years * 49}`,
+          price_paid: `₹${years * 49}`,
+          is_pro: true,
+          device_model: model,
+          android_version: "Verified Pro",
+          order_id: "ADMIN-WB-" + Date.now(),
+          purchase_token: "admin_granted_" + Math.random().toString(36).substring(2, 10),
+          purchased_at: now.toISOString(),
+          expires_at: expiry.toISOString(),
+          updated_at: now.toISOString()
+        }, {
+          "Prefer": "resolution=merge-duplicates"
+        });
+
+        input.value = "";
+        if (nameInput) nameInput.value = "";
+        showToast(`⚡ Pro access successfully granted to device: ${deviceId}!`, "success");
+        await fetchPurchases();
       } catch (err) {
         showToast("Error granting Pro: " + err.message, "error");
       }
