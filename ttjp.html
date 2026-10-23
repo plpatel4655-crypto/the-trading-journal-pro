@@ -669,13 +669,16 @@
                 </div>
 
                 <div class="panel-card">
-                    <h3>💡 DAILY TRADING QUOTE OF THE DAY</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                        <h3 style="margin-bottom: 0;">💡 DAILY TRADING QUOTE OF THE DAY</h3>
+                        <div id="quoteLiveStatusBadge"></div>
+                    </div>
                     <div class="toggle-row" style="margin-bottom: 12px;">
                         <div class="toggle-info">
                             <h4>Enable / Disable Daily Quote Card in App Header</h4>
                             <p>Enable: Show Quote Card in App Header | Disable: Hide Quote Card completely</p>
                         </div>
-                        <label class="switch"><input type="checkbox" id="cfg_quote_active" checked><span class="slider"></span></label>
+                        <label class="switch"><input type="checkbox" id="cfg_quote_active" onchange="toggleQuoteActive()" checked><span class="slider"></span></label>
                     </div>
                     <div class="form-group"><label>Category / Tag Badge Title</label><input type="text" id="cfg_quote_tag" class="form-control" value="TRADING PSYCHOLOGY QUOTE" placeholder="e.g. TRADING PSYCHOLOGY QUOTE / DAILY RULE"></div>
                     <div class="grid-2">
@@ -686,10 +689,10 @@
                     
                     <div class="toggle-row">
                         <div class="toggle-info">
-                            <h4>Auto-Expire Daily (Midnight Reset)</h4>
-                            <p>Enable: Automatically hide/expire quote when date changes to next day</p>
+                            <h4>Auto-Expire Daily (Midnight Reset at 12:00 AM)</h4>
+                            <p>Enable: Automatically hide/expire quote when 12:00 AM midnight arrives (date advances to next day)</p>
                         </div>
-                        <label class="switch"><input type="checkbox" id="cfg_quote_auto_expire" checked><span class="slider"></span></label>
+                        <label class="switch"><input type="checkbox" id="cfg_quote_auto_expire" onchange="toggleQuoteAutoExpire()" checked><span class="slider"></span></label>
                     </div>
                     
                     <div class="toggle-row">
@@ -697,7 +700,7 @@
                             <h4>Allow User to Dismiss (× Hide Button)</h4>
                             <p>Enable: App users can tap '×' to hide the quote card for the day</p>
                         </div>
-                        <label class="switch"><input type="checkbox" id="cfg_quote_user_dismissible" checked><span class="slider"></span></label>
+                        <label class="switch"><input type="checkbox" id="cfg_quote_user_dismissible" onchange="toggleQuoteUserDismissible()" checked><span class="slider"></span></label>
                     </div>
 
                     <div style="display: flex; gap: 10px; margin-top: 12px;">
@@ -1545,6 +1548,9 @@
                 if (map['quote_author'] && document.getElementById('cfg_quote_author')) document.getElementById('cfg_quote_author').value = map['quote_author'];
                 if (map['quote_tag'] && document.getElementById('cfg_quote_tag')) document.getElementById('cfg_quote_tag').value = map['quote_tag'];
                 if (map['quote_image_url'] && document.getElementById('cfg_quote_image')) document.getElementById('cfg_quote_image').value = map['quote_image_url'];
+                if (map['quote_auto_expire'] !== undefined && document.getElementById('cfg_quote_auto_expire')) document.getElementById('cfg_quote_auto_expire').checked = map['quote_auto_expire'] !== 'false';
+                if (map['quote_user_dismissible'] !== undefined && document.getElementById('cfg_quote_user_dismissible')) document.getElementById('cfg_quote_user_dismissible').checked = map['quote_user_dismissible'] !== 'false';
+                if (typeof updateQuoteStatusBadge === 'function') updateQuoteStatusBadge(map);
 
                 if (map['popup_active'] !== undefined && document.getElementById('cfg_popup_active')) document.getElementById('cfg_popup_active').checked = map['popup_active'] === 'true';
                 if (map['popup_title'] && document.getElementById('cfg_popup_title')) document.getElementById('cfg_popup_title').value = map['popup_title'];
@@ -3409,6 +3415,7 @@
                     { key: 'quote_updated_at', value: nowTs }
                 ], { onConflict: 'key' });
                 showToast(`💡 Daily Trading Quote & Tag Published Successfully (${todayStr})!`);
+                if (typeof loadDashboardData === 'function') loadDashboardData();
             } catch (e) { showToast('Quote update: ' + e.message, true); }
         }
 
@@ -3431,7 +3438,88 @@
                 if (document.getElementById('cfg_quote_author')) document.getElementById('cfg_quote_author').value = '';
                 if (document.getElementById('cfg_quote_image')) document.getElementById('cfg_quote_image').value = '';
                 showToast('🗑️ Daily Trading Quote Removed from App Header!');
+                if (typeof loadDashboardData === 'function') loadDashboardData();
             } catch (e) { showToast('Quote Delete Error: ' + e.message, true); }
+        }
+
+        function updateQuoteStatusBadge(map) {
+            const badge = document.getElementById('quoteLiveStatusBadge');
+            if (!badge) return;
+            const active = map['quote_active'] === 'true';
+            const text = map['daily_quote'] || '';
+            const autoExpire = map['quote_auto_expire'] !== 'false';
+            const pubDate = map['quote_publish_date'] || '';
+
+            if (!active || !text) {
+                badge.innerHTML = '<span style="background:rgba(148,163,184,0.15); color:var(--text-muted); border:1px solid var(--border-color); font-size:11px; padding:3px 10px; border-radius:20px; font-weight:700;">⚪ INACTIVE</span>';
+                return;
+            }
+
+            if (autoExpire && pubDate) {
+                const now = new Date();
+                const day = String(now.getDate()).padStart(2, '0');
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const year = now.getFullYear();
+
+                const parts = pubDate.split('-');
+                if (parts.length === 3) {
+                    const pDate = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+                    const tDate = new Date(year, now.getMonth(), now.getDate());
+                    if (tDate > pDate) {
+                        badge.innerHTML = `<span style="background:rgba(239,68,68,0.18); color:var(--danger); border:1px solid rgba(239,68,68,0.4); font-size:11px; padding:3px 10px; border-radius:20px; font-weight:700;">🟡 EXPIRED AT 12:00 AM (Published: ${pubDate})</span>`;
+                        return;
+                    }
+                }
+            }
+
+            badge.innerHTML = `<span style="background:rgba(16,185,129,0.18); color:var(--success); border:1px solid rgba(16,185,129,0.4); font-size:11px; padding:3px 10px; border-radius:20px; font-weight:700;">🟢 LIVE IN APP (${pubDate ? 'Date: ' + pubDate : 'Active'})</span>`;
+        }
+
+        async function toggleQuoteActive() {
+            if (!supabaseClient) return;
+            const isChecked = document.getElementById('cfg_quote_active').checked;
+            try {
+                const nowTs = new Date().getTime().toString();
+                await supabaseClient.from(_0xdec(0x5)).upsert([
+                    { key: 'quote_active', value: isChecked ? 'true' : 'false' },
+                    { key: 'quote_updated_at', value: nowTs }
+                ], { onConflict: 'key' });
+                showToast(isChecked ? '💡 Daily Quote Card Enabled in App!' : '🚫 Daily Quote Card Hidden in App!');
+                if (typeof loadDashboardData === 'function') loadDashboardData();
+            } catch (e) {
+                showToast('Quote active update error: ' + e.message, true);
+            }
+        }
+
+        async function toggleQuoteAutoExpire() {
+            if (!supabaseClient) return;
+            const isChecked = document.getElementById('cfg_quote_auto_expire').checked;
+            try {
+                const nowTs = new Date().getTime().toString();
+                await supabaseClient.from(_0xdec(0x5)).upsert([
+                    { key: 'quote_auto_expire', value: isChecked ? 'true' : 'false' },
+                    { key: 'quote_updated_at', value: nowTs }
+                ], { onConflict: 'key' });
+                showToast(isChecked ? '⏰ Daily Quote Auto-Expire at Midnight (12:00 AM) Enabled!' : '♾️ Daily Quote Midnight Auto-Expire Disabled (Card stays indefinitely)!');
+                if (typeof loadDashboardData === 'function') loadDashboardData();
+            } catch (e) {
+                showToast('Auto-expire update error: ' + e.message, true);
+            }
+        }
+
+        async function toggleQuoteUserDismissible() {
+            if (!supabaseClient) return;
+            const isChecked = document.getElementById('cfg_quote_user_dismissible').checked;
+            try {
+                const nowTs = new Date().getTime().toString();
+                await supabaseClient.from(_0xdec(0x5)).upsert([
+                    { key: 'quote_user_dismissible', value: isChecked ? 'true' : 'false' },
+                    { key: 'quote_updated_at', value: nowTs }
+                ], { onConflict: 'key' });
+                showToast(isChecked ? '✅ User Dismiss (×) Enabled!' : '🚫 User Dismiss (×) Disabled!');
+            } catch (e) {
+                showToast('Dismissible update error: ' + e.message, true);
+            }
         }
 
         async function addAuthorizedDevice() {
